@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Now</title>
+<style>
+  :root { font-family: system-ui, sans-serif; }
+  body { margin: 0; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #fafafa; color: #222; }
+  h1 { margin: 0; font-weight: 500; }
+  .controls { display: flex; gap: 12px; align-items: center; }
+  button { font-size: 16px; padding: 10px 18px; border: 1px solid #ccc; background: white; border-radius: 6px; cursor: pointer; }
+  button.primary { font-size: 28px; padding: 18px 42px; background: #2d7ef7; color: white; border-color: #2d7ef7; }
+  button:hover { filter: brightness(0.95); }
+  #info { font-size: 14px; color: #666; }
+  canvas { background: white; border: 1px solid #ddd; border-radius: 6px; max-width: 100%; }
+</style>
+</head>
+<body>
+  <h1>Now</h1>
+  <button class="primary" id="nowBtn">Now</button>
+  <div id="info">0 presses recorded</div>
+  <canvas id="graph" width="800" height="420"></canvas>
+  <div class="controls">
+    <button id="exportBtn">Export JSON</button>
+    <button id="exportCsvBtn">Export CSV</button>
+    <button id="clearBtn">Clear</button>
+  </div>
+
+<script>
+const STORAGE_KEY = "now_presses_v1";
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter(n => typeof n === "number") : [];
+  } catch { return []; }
+}
+
+function save(presses) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(presses));
+}
+
+let presses = load();
+
+const canvas = document.getElementById("graph");
+const ctx = canvas.getContext("2d");
+
+function fmtTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleString();
+}
+
+function fmtAxisTime(ts) {
+  const d = new Date(ts);
+  const pad = n => String(n).padStart(2, "0");
+  return `${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function draw() {
+  const W = canvas.width, H = canvas.height;
+  const padL = 60, padR = 20, padT = 20, padB = 50;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // axes
+  ctx.strokeStyle = "#333";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT);
+  ctx.lineTo(padL, padT + plotH);
+  ctx.lineTo(padL + plotW, padT + plotH);
+  ctx.stroke();
+
+  // y-axis: 0..60 minutes
+  ctx.fillStyle = "#333";
+  ctx.font = "12px system-ui, sans-serif";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  const yTicks = [0, 10, 20, 30, 40, 50, 60];
+  for (const m of yTicks) {
+    const y = padT + plotH - (m / 60) * plotH;
+    ctx.strokeStyle = "#eee";
+    ctx.beginPath();
+    ctx.moveTo(padL, y);
+    ctx.lineTo(padL + plotW, y);
+    ctx.stroke();
+    ctx.fillText(String(m), padL - 6, y);
+  }
+
+  // y-axis label
+  ctx.save();
+  ctx.translate(16, padT + plotH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = "center";
+  ctx.fillText("Δ minutes (capped at 60)", 0, 0);
+  ctx.restore();
+
+  // build points
+  const points = [];
+  for (let i = 1; i < presses.length; i++) {
+    const dtMs = presses[i] - presses[i-1];
+    const dtMin = Math.min(60, Math.max(0, dtMs / 60000));
+    points.push({ x: presses[i], y: dtMin });
+  }
+
+  if (points.length === 0) {
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#999";
+    ctx.fillText("Press \"Now\" at least twice to see points.", padL + plotW/2, padT + plotH/2);
+    return;
+  }
+
+  // x range
+  let xMin = points[0].x;
+  let xMax = points[points.length - 1].x;
+  if (xMin === xMax) { xMin -= 60000; xMax += 60000; }
+
+  const xScale = t => padL + ((t - xMin) / (xMax - xMin)) * plotW;
+  const yScale = v => padT + plotH - (v / 60) * plotH;
+
+  // x ticks: up to 5
+  const xTickCount = Math.min(5, points.length);
+  ctx.fillStyle = "#333";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  for (let i = 0; i < xTickCount; i++) {
+    const t = xMin + ((xMax - xMin) * i) / Math.max(1, xTickCount - 1);
+    const x = xScale(t);
+    ctx.strokeStyle = "#ddd";
+    ctx.beginPath();
+    ctx.moveTo(x, padT);
+    ctx.lineTo(x, padT + plotH);
+    ctx.stroke();
+    ctx.fillText(fmtAxisTime(t), x, padT + plotH + 6);
+  }
+
+  // line
+  ctx.strokeStyle = "#2d7ef7";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  points.forEach((p, i) => {
+    const x = xScale(p.x), y = yScale(p.y);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // dots
+  ctx.fillStyle = "#2d7ef7";
+  for (const p of points) {
+    ctx.beginPath();
+    ctx.arc(xScale(p.x), yScale(p.y), 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function updateInfo() {
+  const n = presses.length;
+  const info = document.getElementById("info");
+  if (n === 0) info.textContent = "0 presses recorded";
+  else if (n === 1) info.textContent = `1 press recorded at ${fmtTime(presses[0])}`;
+  else info.textContent = `${n} presses recorded — last at ${fmtTime(presses[n-1])}`;
+}
+
+function render() {
+  updateInfo();
+  draw();
+}
+
+document.getElementById("nowBtn").addEventListener("click", () => {
+  presses.push(Date.now());
+  save(presses);
+  render();
+});
+
+function download(filename, content, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const data = presses.map(ts => ({ timestamp_ms: ts, iso: new Date(ts).toISOString() }));
+  download("now-presses.json", JSON.stringify(data, null, 2), "application/json");
+});
+
+document.getElementById("exportCsvBtn").addEventListener("click", () => {
+  const rows = ["index,timestamp_ms,iso,delta_minutes"];
+  presses.forEach((ts, i) => {
+    const delta = i === 0 ? "" : ((ts - presses[i-1]) / 60000).toFixed(4);
+    rows.push(`${i},${ts},${new Date(ts).toISOString()},${delta}`);
+  });
+  download("now-presses.csv", rows.join("\n"), "text/csv");
+});
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  if (confirm("Clear all recorded presses?")) {
+    presses = [];
+    save(presses);
+    render();
+  }
+});
+
+render();
+</script>
+</body>
+</html>
