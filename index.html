@@ -289,7 +289,11 @@
 // --- i18n --------------------------------------------------------------
 // Detect browser locale. "el*" → Greek (Argo / oars re-theme); "pt*" →
 // Brazilian Portuguese (paulistano traffic re-theme: getting to the
-// maternidade through SP trânsito, with paulistano slang in the status pool).
+// maternidade through SP trânsito, with paulistano slang in the status pool);
+// "fr*" → French (Airbus Toulouse / Beluga re-theme: the mother is the Beluga
+// cargo plane delivering fuselage sections from subcontractors to the final
+// assembly line in Blagnac, with Toulousain local color — rugby, chocolatine,
+// Pyrenees, Rio Loco, Garonne).
 const I18N = {
   en: {
     title: "EIS COUNTDOWN",
@@ -745,6 +749,176 @@ const I18N = {
       ],
     },
   },
+
+  fr: {
+    title: "BELUGA — COMPTE À REBOURS",
+    subtitle: "// suivi de rotation cargo · cap de convergence : T-5 min //",
+    sharedBannerLabel: "// VUE PARTAGÉE //",
+    sharedBannerText: " — instantané en lecture seule",
+    sharedBannerSuffix: ". Les commandes de saisie sont désactivées.",
+    sharedSaveBtn: "ENREGISTRER SUR CET APPAREIL (écrase le local)",
+    sharedExitBtn: "QUITTER LA VUE PARTAGÉE",
+    howtoSummary: "// COMMENT UTILISER CETTE APPLI //",
+    howtoLi1: `<strong>Après chaque contraction</strong>, touchez l'un des quatre boutons colorés ci-dessous selon <em>la durée</em> de la contraction : <code>Aïe</code> (moins de 30 secondes), <code>Aïe aïe</code> (30–60 s), <code>Aïe aïe aïe</code> (60–120 s), ou <code>Aïe maman !</code> (plus de 2 minutes). Les étiquettes ne concernent que la <em>durée</em>, pas l'intensité de la douleur. C'est le mode le plus rapide et l'appli n'a pas besoin d'être ouverte pendant la contraction.`,
+    howtoLi2: `<strong>Pour une mesure précise</strong> quand l'appli est déjà ouverte, touchez <code>J'AI PERDU LE COMPTE</code> au <em>début</em> de la contraction puis de nouveau à la <em>fin</em>. Le robot chronomètre à la seconde près.`,
+    howtoLi3: `<strong>Regardez le graphique et la ligne d'état jaune.</strong> Chaque point est un intervalle entre deux contractions. Au fil du travail, les points devraient dériver vers la ligne verte en pointillés des 5 minutes. La ligne d'état vous dit, avec un humour de robot, à quelle phase ressemble le motif.`,
+    howtoLi4: `<strong>La règle 5-1-1.</strong> La consigne standard est d'aller à la maternité quand les contractions sont à environ 5 minutes d'intervalle, durent chacune environ 1 minute, et que ce motif tient depuis environ 1 heure. L'appli affiche <code>5-1-1 tenu(1h) : OUI</code> quand la condition est remplie.`,
+    howtoLi5: `<strong>Exportez</strong> le journal de vol en JSON ou CSV (bas de page) si vous voulez une trace pour la sage-femme ou l'obstétricien.`,
+    howtoWarn: `⚠ <strong>Signaux de dérogation — allez directement à la maternité quoi que dise cette appli :</strong> perte des eaux, saignement vaginal, diminution des mouvements du bébé, douleur sévère constante entre les contractions, moins de 37 semaines avec suspicion de travail, toute contraction qui dure plus de 2 minutes, 6+ contractions en 10 minutes, ou forte envie de pousser.`,
+    bucketHeyLabel: "Aïe",             bucketHeySub: "< 30 s",
+    bucketOwLabel: "Aïe aïe",          bucketOwSub: "30 – 60 s",
+    bucketOuchLabel: "Aïe aïe aïe",    bucketOuchSub: "60 – 120 s",
+    bucketYikesLabel: "Aïe maman !",   bucketYikesSub: "> 120 s",
+    autoTimerIdle: "J'AI PERDU LE COMPTE",
+    timerCounting: (mm, ss) => `CHRONO… ${mm}:${ss}  (touchez pour arrêter)`,
+    timerHint: "// touchez une fois au début de la contraction, une fois à la fin — mesure la durée exacte en secondes //",
+    initialInfo: "Journal de vol vide. En attente de la première rotation.",
+    exportJsonBtn: "TÉLÉCHARGER LE JOURNAL (.json)",
+    exportCsvBtn: "TÉLÉCHARGER LE JOURNAL (.csv)",
+    shareBtn: "COPIER LE LIEN DE PARTAGE",
+    shareBtnCopied: "LIEN COPIÉ ✓",
+    clearBtn: "PURGER LE JOURNAL",
+    purgeConfirm: "PURGER TOUT LE JOURNAL ? Cette unité ne sait pas annuler.",
+    noShareTelemetry: "Aucune donnée à partager pour l'instant.",
+    linkCopyPrompt: "Copiez ce lien :",
+    sharedSaveConfirm: "Enregistrer cet instantané partagé sur CET appareil ? Toute donnée locale déjà présente sera écrasée.",
+    sharedMeta: (n, first, last) => ` (${n} rotations, ${first} → ${last})`,
+    yAxisLabel: "Δ minutes entre rotations (plafond 60)",
+    targetLineLabel: "cap T-5",
+    awaitingSecond: "// en attente de la 2e rotation pour calculer Δ //",
+    infoPulse: (pulseStr, ts, durStr, lastDelta, deltasN, avg, sigma, avgDurSec, durCount, sustained, cfPct) =>
+      `ROTATION ${pulseStr} @ ${ts}` +
+      ` — durée dern. : ${durStr}` +
+      ` | Δ dern. : ${lastDelta} min` +
+      ` | moy. Δ(${deltasN}) : ${avg} min` +
+      ` | σ : ${sigma} min` +
+      (avgDurSec !== null ? ` | moy. durée(${durCount}) : ${avgDurSec} s` : " | moy. durée : —") +
+      ` | 5-1-1 tenu(1h) : ${sustained ? "OUI" : "non"}` +
+      ` | convergence heuristique : ${cfPct}%`,
+    infoFirst: (ts, durStr) => `ROTATION 001 @ ${ts} — durée : ${durStr} | Δ : — | σ : — | convergence : —`,
+    footerDisclaimer: `⚠ <strong>N'EST PAS UN DISPOSITIF MÉDICAL.</strong> Cette appli est un compagnon ludique pour chronométrer les intervalles entre contractions. Elle ne diagnostique pas le travail, ne remplace pas le jugement clinique, et ne peut pas remplacer le contact avec un professionnel de santé qualifié. Dans le doute, appelez votre sage-femme, votre obstétricien ou votre maternité.`,
+    footerThresholdsH2: "// SEUILS ET SOURCES //",
+    footerLi1: `<strong>Règle 5-1-1 (palier « prep ») :</strong> contractions à ~5 minutes d'intervalle, d'environ 1 minute chacune, tenues pendant ~1 heure avant de partir à la maternité. L'appli vérifie l'intervalle de 5 minutes et la fenêtre tenue de 1 heure. Quand des données de durée existent (soit via le chrono auto « J'AI PERDU LE COMPTE », soit via un bouton Aïe), l'appli vérifie aussi la durée moyenne ≥ 55 s (fourchette travail actif Mayo 60–90 s, voir [2]) ; sinon la moitié durée doit être confirmée par l'opérateur. Source : Cleveland Clinic, « Stages of Labor » (révisé 2025-04-23) : <a href="https://my.clevelandclinic.org/health/body/22640-stages-of-labor" target="_blank" rel="noopener">clevelandclinic.org/…/stages-of-labor</a>.`,
+    footerLi2: `<strong>Paliers de durée (Aïe / Aïe aïe / Aïe aïe aïe / Aïe maman !) :</strong> les limites à 30 / 60 / 120 s viennent directement de fourchettes publiées. &lt; 30 s = fourchette de durée en travail précoce selon Cleveland Clinic, « Contractions » (mis à jour 2024-08-08) : <a href="https://my.clevelandclinic.org/health/symptoms/contractions" target="_blank" rel="noopener">clevelandclinic.org/…/contractions</a>. 60–120 s recouvre la fourchette de travail actif Mayo Clinic « 60 à 90 secondes » dans « Stages of labor and birth » : <a href="https://www.mayoclinic.org/healthy-lifestyle/labor-and-delivery/in-depth/stages-of-labor/art-20046545" target="_blank" rel="noopener">mayoclinic.org/…/stages-of-labor</a>. &gt; 120 s est le signal de dérogation urgente du NHS dans « Signs that labour has begun » (révisé 2023-11-09) : <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>. Chaque palier stocke le point médian de la fourchette comme <code>duration_sec</code> estimée avec une étiquette de source <code>bucket:*</code> afin que les données mesurées et estimées restent distinguables à l'export.`,
+    footerLi3: `<strong>Contractions de travail actif (palier « imminent ») :</strong> « toutes les deux à cinq minutes, durant environ 60 à 90 secondes ». L'appli utilise <em>moy. &lt; 3 min</em> comme approximation du travail actif avancé. Source : Mayo Clinic, « Stages of labor and birth » : <a href="https://www.mayoclinic.org/healthy-lifestyle/labor-and-delivery/in-depth/stages-of-labor/art-20046545" target="_blank" rel="noopener">mayoclinic.org/…/stages-of-labor</a>.`,
+    footerLi4: `<strong>Travail précoce / phase latente (palier « drill ») :</strong> contractions de « 20 à 30 secondes », « toutes les 30 à 60 minutes » ; le NHS décrit les intervalles de phase latente comme très variables — « quelques minutes ... ou une demi-heure voire plus ». Sources : Cleveland Clinic, « Contractions » (mis à jour 2024-08-08) : <a href="https://my.clevelandclinic.org/health/symptoms/contractions" target="_blank" rel="noopener">clevelandclinic.org/…/contractions</a> ; NHS, « Signs that labour has begun » (révisé 2023-11-09) : <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>.`,
+    footerLi5: `<strong>Tachysystolie / dérogation urgente (palier « critical ») :</strong> le NHS liste comme urgent « 6 contractions ou plus toutes les 10 minutes » → intervalle moyen &lt; 1,67 min, OU toute contraction qui dure plus de 2 minutes (&gt; 120 s). L'appli applique LES DEUX moitiés : le contrôle d'intervalle systématiquement, et le contrôle de durée dès que la dernière contraction a des données de durée (chrono ou bouton). Source : NHS, « Signs that labour has begun » (révisé 2023-11-09) : <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>.`,
+    footerLi6: `<strong>Seuil cervical de travail actif (contexte uniquement ; non utilisé dans la classification) :</strong> ACOG/SMFM placent la phase active à 6 cm de dilatation (Obstetric Care Consensus No. 1, 2014) ; l'OMS la place à 5 cm (Labour Care Guide, 2020) ; le NICE utilise 4 cm (NG235, 2023-09-29). L'appli ne peut pas mesurer la dilatation et n'utilise pas ce seuil — listé ici pour expliquer pourquoi les noms de paliers n'en dépendent pas. Sources : ACOG OCC #1 (2014, via AJOG) : <a href="https://www.ajog.org/article/S0002-9378(14)00055-6/fulltext" target="_blank" rel="noopener">ajog.org</a> ; WHO Labour Care Guide (2020) : <a href="https://iris.who.int/bitstream/handle/10665/337693/9789240017566-eng.pdf" target="_blank" rel="noopener">iris.who.int</a> ; NICE NG235 : <a href="https://www.nice.org.uk/guidance/ng235/chapter/Recommendations" target="_blank" rel="noopener">nice.org.uk/guidance/ng235</a>.`,
+    footerLi7: `<strong>Vrai vs. faux travail (qualitatif) :</strong> ACOG : « Les vraies contractions de travail ont un motif, se rapprochent avec le temps, et chacune dure environ 60 ou 90 secondes ... elles continuent même quand on se repose ou qu'on bouge. » Aucune recommandation ne publie de seuil numérique de variance / σ. L'affichage σ de l'appli est une aide visuelle uniquement et n'est PAS utilisé dans la classification. Source : ACOG FAQ, « How to Tell When Labor Begins » : <a href="https://www.acog.org/womens-health/faqs/how-to-tell-when-labor-begins" target="_blank" rel="noopener">acog.org/…/how-to-tell-when-labor-begins</a>.`,
+    footerHospitalH2: "// ALLEZ À LA MATERNITÉ QUOI QUE DISE CETTE APPLI SI //",
+    footerHospitalP: `Perte des eaux (surtout si odeur ou couleur), saignement vaginal, diminution des mouvements du bébé, douleur sévère constante sans répit entre les contractions, moins de 37 semaines avec suspicion de travail, contractions de plus de 2 minutes, 6+ contractions en 10 minutes, ou forte envie de pousser. Sources : NHS, « Signs that labour has begun » (2023-11-09) ; ACOG FAQ, « How to Tell When Labor Begins ».`,
+    footerLimitsH2: "// LIMITES DE L'APPLI //",
+    footerLimitsP: `(1) Les données de durée sont soit <strong>mesurées</strong> (via le chrono auto « J'AI PERDU LE COMPTE »), soit <strong>paliérisées</strong> (via un tap sur l'un des 4 boutons Aïe, la durée stockée étant le point médian de la fourchette choisie — 20 / 45 / 90 / 150 s). Sans données de durée, la moitié « ~1 minute » de la règle 5-1-1 retombe sur la confirmation de l'opérateur. (2) La fenêtre statistique glissante porte sur les 5 derniers intervalles ; le contrôle « tenu » de 1 h utilise tous les appuis des ~65 dernières minutes. (3) Aucune recommandation ne publie de seuil numérique de régularité/σ, donc σ et le pourcentage de « convergence heuristique » sont purement d'affichage et ne pilotent pas la classification. (4) ACOG/OMS/NICE sont en désaccord sur le marqueur de dilatation cervicale du travail actif (6 cm / 5 cm / 4 cm) — l'appli ne peut pas mesurer la dilatation et n'en dépend pas. (5) L'appli ne sait rien de la perte des eaux, des saignements ou des autres signaux de dérogation listés ci-dessus ; l'opérateur doit agir de son propre chef. (6) « J'AI PERDU LE COMPTE » dépend du fait que l'appli reste ouverte entre les taps de début et de fin ; si vous fermez l'onglet ou rechargez la page en pleine contraction, le chrono est perdu — dans ce cas, utilisez un bouton de palier après coup.`,
+    // Humor re-themed to Airbus Toulouse and the Beluga delivering cargo to
+    // the final assembly line in Blagnac. The "mother" is the Beluga XL; the
+    // "payload" is the baby/fuselage section arriving from subcontractor
+    // plants (Broughton wings, Hamburg aft fuselage, Saint-Nazaire forward,
+    // Getafe horizontal stabilizer). Toulousain local color: Stade Toulousain
+    // rugby, chocolatine (NOT pain au chocolat — house rule), Pyrenees
+    // hiking, Rio Loco festival on the Prairie des Filtres, Garonne, violette,
+    // cassoulet, Place du Capitole. Running gag: at EIS the newborn gets a
+    // blue Airbus staff badge, and various subcontractors "help".
+    status: {
+      idle: [
+        "SYSTÈME EN VEILLE — Beluga au hangar de Blagnac, moteurs coupés.",
+        "Démarrage du journal. Rien à signaler. L'unité soupçonne que ça va durer.",
+        "En standby. La cargaison fait la sieste, rêve probablement de chocolatines.",
+        "Cette unité est pleinement opérationnelle et s'ennuie ferme.",
+        "Zéro donnée. Zéro rotation. Zéro stress. Pour l'instant.",
+        "Tarmac tranquille. La tour de contrôle de Blagnac sirote un café.",
+        "Équipage sol : finit de réviser son topo de rando dans les Pyrénées ce week-end.",
+      ],
+      first: [
+        "ROTATION 001 ENREGISTRÉE — le convoyage commence.",
+        "Un seul point de donnée. Les statisticiens voudraient vous dire deux mots.",
+        "Première rotation captée. L'unité ne distingue pas encore contraction et turbulence.",
+        "Liaison télémétrique établie. Merci d'appuyer encore, avant la retraite.",
+        "Impulsion initiale détectée. Démarrage du chronomètre le plus nerveux de Haute-Garonne.",
+      ],
+      drill: [
+        "NOMINAL — essai réussi. La cargaison reste de marbre.",
+        "STATUT VERT — c'est presque sûrement le cassoulet d'hier.",
+        "Check-list avant rotation : 1/47. Détends-toi, mets un résumé du Stade Toulousain.",
+        "Sous-systèmes qui ronronnent. La cargaison réarrange ses organes pour le sport.",
+        "Tout va bien. C'est un exercice. C'est du Braxton-Hicks, promis juré.",
+        "EN ATTENTE — la cargaison refuse de déposer son plan de vol.",
+        "Long intervalle détecté. L'unité soupçonne une fausse alerte. Pas de remboursement.",
+        "Créneau de décollage : littéralement pas aujourd'hui.",
+        "Tour de contrôle recommande : chocolatine (on a dit chocolatine), eau, scepticisme modéré.",
+        "Aucune convergence. La cargaison remplit un formulaire en trois exemplaires, tamponné Airbus.",
+        "Sous-traitants de Broughton en pause thé. Les ailes attendront.",
+        "L'unité consulte la météo : Rio Loco commence vendredi sur la Prairie des Filtres, si ça peut tenir.",
+      ],
+      warming: [
+        "GRONDEMENT PRÉ-DÉCOLLAGE — des choses arrivent. Lentement. Administrativement.",
+        "Sous-systèmes qui chauffent. La cargaison révise la procédure de sortie dans le manuel.",
+        "Intervalles qui se resserrent. L'unité est prudemment optimiste, pour un robot.",
+        "SECOUSSE DÉTECTÉE — localise le sac maternité, vérifie qu'il contient bien un pantalon.",
+        "Séquence APU lancée. Départ estimé : un de ces quatre.",
+        "Signes précoces de convergence. La cargaison s'étire. Littéralement.",
+        "Nervosité pré-vol détectée — dans la cargaison ET dans le copilote.",
+        "STATUT AMBRE — tu peux maintenant faire les cent pas avec notre bénédiction.",
+        "Tendance d'intervalle : décroissante. Confiance : niveau robot.",
+        "Ça chauffe. L'unité recommande de finir CET épisode MAINTENANT.",
+        "Les sous-traitants de Hambourg viennent de livrer le tronçon arrière. Ça s'active sur la chaîne.",
+        "Roulage autorisé vers la piste 32L. Le bout du nez voit déjà le pic du Midi.",
+      ],
+      approach: [
+        "PHASE D'APPROCHE — trajectoire à peu près nominale. Préchauffez les moteurs.",
+        "Ce n'est plus un exercice. Probablement. Peut-être. Mise à jour en cours.",
+        "Convergence détectée. Unité sûre à 74 %. Les 26 % restants, c'est de la panique.",
+        "Il est recommandé que le pilote prenne un café, mais reste en dessous de la limite d'alcoolémie.",
+        "Intervalles qui se serrent. La cargaison ne plaisante plus.",
+        "COULOIR D'APPROCHE ACQUIS — charge le téléphone, prends les clés, respire.",
+        "T-moins : bientôt. Sans doute bientôt-bientôt.",
+        "L'unité fait passer la prévision de « peut-être » à « oh là ».",
+        "Préparation au roulage — doucement, avec dignité. On ne court pas encore.",
+        "Convergence. Convergence. Convergence. [tambours lointains du Rio Loco]",
+        "Finale sur Blagnac : la Garonne à gauche, les Pyrénées droit devant, Place du Capitole derrière.",
+        "Les sous-traitants de Saint-Nazaire appellent pour savoir si l'avant est bien arrivé. Oui. Oui il arrive.",
+      ],
+      prep: [
+        "PRÉPARATION À LA LIVRAISON — couloir de convergence verrouillé. Destination : maternité.",
+        "Créneau d'atterrissage qui s'ouvre. L'unité recommande FORTEMENT de mettre des chaussures.",
+        "C'est ça. Probablement. Presque sûrement ça. Monte dans la voiture.",
+        "CONVERGENCE CONFIRMÉE — cadence 5 minutes tenue. Fais-le.",
+        "STATUT ROUGE — la cargaison dépose une intention formelle de débarquement.",
+        "L'unité recommande : clés, serviettes, voix calme, conduite réelle (pas par l'A61).",
+        "PRÉP DÉCOLLAGE — compte à rebours bloqué à T-presque-maintenant.",
+        "Régularité atteinte. Cap sur la ligne d'assemblage final — urgent, mais sans excès de vitesse.",
+        "FEU VERT — cette unité est légalement tenue de vous dire de bouger.",
+        "Cadence 5 minutes verrouillée. La biologie a repris les commandes de vol.",
+        "Les sous-traitants sont sur le tarmac, gilets jaunes, bâtons lumineux. Ils attendent la Beluga.",
+      ],
+      imminent: [
+        "LIVRAISON IMMINENTE — bonne chance, humaine.",
+        "FENÊTRE EIS CONFIRMÉE — la cargaison a déposé son préavis. GO.",
+        "SÉQUENCE D'ATTERRISSAGE ENGAGÉE — cette unité n'est plus qualifiée pour aider.",
+        "T-MOINS COURT — recommandation : être déjà à la maternité.",
+        "Cette unité souhaite formellement pointer la fin de son service.",
+        "CONVERGENCE VERROUILLÉE — la cargaison exige son visa de sortie. ACCORDÉ.",
+        "Bonne chance, pilote de chair et d'os. C'est ton plus beau vol.",
+        "LIVRAISON IMMINENTE — pour raisons légales, sois déjà à la maternité, s'il te plaît.",
+        "EIS ATTEINT — débarquement cargaison imminent. L'unité te salue.",
+        "C'est le moment où les humains reprennent les manettes. Bon vent.",
+        "Le nouveau reçoit son badge bleu Airbus à la sortie du hangar. Photo d'identité pas obligatoire.",
+        "Les sous-traitants de Getafe, Broughton, Hambourg et Saint-Nazaire applaudissent poliment au fond.",
+      ],
+      critical: [
+        "DÉCOLLAGE D'URGENCE — BONNE CHANCE HUMAINE.",
+        "LIVRAISON RAPIDE NON PROGRAMMÉE — attrape la cargaison, NE LA FAIS PAS TOMBER.",
+        "CETTE UNITÉ N'EST PAS CERTIFIÉE POUR RATTRAPER. BONNE CHANCE.",
+        "ABANDON ABANDON ABANDON — non, l'inverse. DÉCOLLAGE DÉCOLLAGE DÉCOLLAGE.",
+        "SÉPARATION D'URGENCE — déploie maternité ou serviettes, au plus proche.",
+        "La cargaison a atteint l'énergie « rôle principal ». L'unité s'efface.",
+        "CADENCE CRITIQUE — si tu n'es pas à la maternité, appelle le SAMU (15) maintenant.",
+        "Ça arrive. Ça arrive MAINTENANT. L'unité s'excuse pour le ton.",
+        "DÉSASSEMBLAGE RAPIDE NON PROGRAMMÉ DE LA PHASE DE TRAVAIL — vas-y vas-y vas-y.",
+        "MAYDAY MAYDAY — livraison biologique en cours. L'unité se récuse.",
+        "Pompiers de Blagnac mobilisés. Le badge bleu sera imprimé et plastifié plus tard.",
+      ],
+    },
+  },
 };
 
 // Locale resolution: explicit user choice (localStorage) overrides
@@ -756,6 +930,7 @@ function detectLang() {
   const code = (navigator.language || "en").toLowerCase();
   if (code.startsWith("el")) return "el";
   if (code.startsWith("pt")) return "pt";
+  if (code.startsWith("fr")) return "fr";
   return "en";
 }
 let LANG = detectLang();
