@@ -67,25 +67,32 @@
   body.shared-mode .timer-wrap,
   body.shared-mode #clearBtn,
   body.shared-mode #shareBtn { display: none; }
+
+  /* Language selector */
+  #langSelect { position: fixed; top: 12px; left: 12px; font-family: inherit; font-size: 12px; padding: 6px 8px; background: #121a28; color: #a9d2ff; border: 1px solid #2b3b55; border-radius: 4px; letter-spacing: 1px; cursor: pointer; z-index: 10; }
+  #langSelect:hover { filter: brightness(1.15); }
 </style>
 </head>
 <body>
-  <h1>EIS COUNTDOWN</h1>
-  <p class="subtitle">// payload launch monitor · convergence target: T-5min //</p>
+  <select id="langSelect" aria-label="Language">
+    <option value="en">EN</option>
+    <option value="el">EL</option>
+  </select>
+  <h1 data-i18n="title">EIS COUNTDOWN</h1>
+  <p class="subtitle" data-i18n="subtitle">// payload launch monitor · convergence target: T-5min //</p>
 
   <div id="sharedBanner">
-    <strong>// SHARED VIEW //</strong> — read-only snapshot
-    <span id="sharedMeta"></span>. Input controls are disabled.
+    <strong data-i18n="sharedBannerLabel">// SHARED VIEW //</strong><span data-i18n="sharedBannerText"> — read-only snapshot</span><span id="sharedMeta"></span><span data-i18n="sharedBannerSuffix">. Input controls are disabled.</span>
     <div class="banner-actions">
-      <button id="sharedSaveBtn">SAVE TO THIS DEVICE (overwrites local)</button>
-      <button id="sharedExitBtn">EXIT SHARED VIEW</button>
+      <button id="sharedSaveBtn" data-i18n="sharedSaveBtn">SAVE TO THIS DEVICE (overwrites local)</button>
+      <button id="sharedExitBtn" data-i18n="sharedExitBtn">EXIT SHARED VIEW</button>
     </div>
   </div>
 
   <details class="howto" open>
-    <summary>// HOW TO USE THIS APP //</summary>
+    <summary data-i18n="howtoSummary">// HOW TO USE THIS APP //</summary>
     <ol>
-      <li>
+      <li data-i18n="howtoLi1">
         <strong>After each contraction</strong>, tap one of the four
         colored buttons below based on <em>how long</em> the contraction
         lasted: <code>Ow</code> (under 30 seconds), <code>Oooow</code>
@@ -94,32 +101,32 @@
         <em>duration</em>, not pain intensity. This is the fastest mode
         and doesn't need the app to be open during the contraction.
       </li>
-      <li>
+      <li data-i18n="howtoLi2">
         <strong>If you want a precise measurement</strong> and the app
         is already open, tap <code>I CAN'T COUNT</code> when the
         contraction <em>starts</em> and tap again when it <em>ends</em>.
         The robot will time it for you down to the second.
       </li>
-      <li>
+      <li data-i18n="howtoLi3">
         <strong>Watch the graph and the yellow status line.</strong>
         Each dot is one interval between contractions. As labor
         progresses, dots should drift toward the dashed green line at
         5 minutes. The status line tells you, with robot humor, which
         stage the pattern looks like.
       </li>
-      <li>
+      <li data-i18n="howtoLi4">
         <strong>The 5-1-1 rule.</strong> The standard guideline is to go
         to the hospital when contractions are about 5 minutes apart,
         each about 1 minute long, and that pattern has held for about
         1 hour. The app will show <code>5-1-1 sustained(1h): YES</code>
         when that condition is met.
       </li>
-      <li>
+      <li data-i18n="howtoLi5">
         <strong>Export</strong> the log as JSON or CSV (bottom of the
         page) if you want a record for your midwife or OB.
       </li>
     </ol>
-    <p class="howto-warn">
+    <p class="howto-warn" data-i18n="howtoWarn">
       ⚠ <strong>Override signals — go straight to your maternity unit
       regardless of what this app says:</strong> waters break, vaginal
       bleeding, reduced fetal movement, constant severe pain between
@@ -130,29 +137,29 @@
   </details>
 
   <div class="bucket-grid" id="bucketGrid">
-    <button class="bucket b-hey"   data-bucket="hey"><span class="b-label">Ow</span><span class="b-sub">&lt; 30 s</span></button>
-    <button class="bucket b-ow"    data-bucket="ow"><span class="b-label">Oooow</span><span class="b-sub">30 – 60 s</span></button>
-    <button class="bucket b-ouch"  data-bucket="ouch"><span class="b-label">Oooooow</span><span class="b-sub">60 – 120 s</span></button>
-    <button class="bucket b-yikes" data-bucket="yikes"><span class="b-label">Oooo….w!</span><span class="b-sub">&gt; 120 s</span></button>
+    <button class="bucket b-hey"   data-bucket="hey"><span class="b-label" data-i18n="bucketHeyLabel">Ow</span><span class="b-sub" data-i18n="bucketHeySub">&lt; 30 s</span></button>
+    <button class="bucket b-ow"    data-bucket="ow"><span class="b-label" data-i18n="bucketOwLabel">Oooow</span><span class="b-sub" data-i18n="bucketOwSub">30 – 60 s</span></button>
+    <button class="bucket b-ouch"  data-bucket="ouch"><span class="b-label" data-i18n="bucketOuchLabel">Oooooow</span><span class="b-sub" data-i18n="bucketOuchSub">60 – 120 s</span></button>
+    <button class="bucket b-yikes" data-bucket="yikes"><span class="b-label" data-i18n="bucketYikesLabel">Oooo….w!</span><span class="b-sub" data-i18n="bucketYikesSub">&gt; 120 s</span></button>
   </div>
 
   <div class="timer-wrap">
-    <button class="auto-timer" id="autoTimerBtn">I CAN'T COUNT</button>
-    <span class="hint">// tap once when the contraction starts, tap again when it ends — measures exact duration in seconds //</span>
+    <button class="auto-timer" id="autoTimerBtn" data-i18n="autoTimerIdle">I CAN'T COUNT</button>
+    <span class="hint" data-i18n="timerHint">// tap once when the contraction starts, tap again when it ends — measures exact duration in seconds //</span>
   </div>
 
   <div id="status">SYSTEM IDLE — payload secured in launchpad.</div>
   <div id="info">Telemetry buffer empty. Awaiting first pulse.</div>
   <canvas id="graph" width="800" height="420"></canvas>
   <div class="controls">
-    <button id="exportBtn">DOWNLOAD TELEMETRY (.json)</button>
-    <button id="exportCsvBtn">DOWNLOAD TELEMETRY (.csv)</button>
-    <button id="shareBtn">COPY SHARE LINK</button>
-    <button id="clearBtn">PURGE LOG</button>
+    <button id="exportBtn" data-i18n="exportJsonBtn">DOWNLOAD TELEMETRY (.json)</button>
+    <button id="exportCsvBtn" data-i18n="exportCsvBtn">DOWNLOAD TELEMETRY (.csv)</button>
+    <button id="shareBtn" data-i18n="shareBtn">COPY SHARE LINK</button>
+    <button id="clearBtn" data-i18n="clearBtn">PURGE LOG</button>
   </div>
 
   <footer>
-    <div class="disclaimer">
+    <div class="disclaimer" data-i18n="footerDisclaimer">
       ⚠ <strong>NOT A MEDICAL DEVICE.</strong> This app is a toy companion
       for timing intervals between contractions. It does not diagnose labor,
       does not replace clinical judgement, and cannot substitute for contact
@@ -160,9 +167,9 @@
       OB, or maternity unit.
     </div>
 
-    <h2>// THRESHOLDS AND SOURCES //</h2>
+    <h2 data-i18n="footerThresholdsH2">// THRESHOLDS AND SOURCES //</h2>
     <ol>
-      <li>
+      <li data-i18n="footerLi1">
         <strong>5-1-1 rule (tier "prep"):</strong> contractions ~5 minutes
         apart, each ~1 minute long, sustained for ~1 hour before going to
         the hospital. The app verifies the 5-minute interval and the
@@ -174,7 +181,7 @@
         2025-04-23):
         <a href="https://my.clevelandclinic.org/health/body/22640-stages-of-labor" target="_blank" rel="noopener">clevelandclinic.org/…/stages-of-labor</a>.
       </li>
-      <li>
+      <li data-i18n="footerLi2">
         <strong>Duration buckets (Ow / Oooow / Oooooow / Oooo….w!):</strong>
         boundaries at 30 / 60 / 120 s come directly from published ranges.
         &lt; 30 s = early-labor duration range per Cleveland Clinic,
@@ -190,14 +197,14 @@
         <code>duration_sec</code> with a <code>bucket:*</code> source tag
         so measured and estimated data stay distinguishable on export.
       </li>
-      <li>
+      <li data-i18n="footerLi3">
         <strong>Active labor contractions (tier "imminent"):</strong>
         "every two to five minutes, lasting about 60 to 90 seconds." The
         app uses <em>avg &lt; 3 min</em> as a proxy for deep active labor.
         Source: Mayo Clinic, "Stages of labor and birth":
         <a href="https://www.mayoclinic.org/healthy-lifestyle/labor-and-delivery/in-depth/stages-of-labor/art-20046545" target="_blank" rel="noopener">mayoclinic.org/…/stages-of-labor</a>.
       </li>
-      <li>
+      <li data-i18n="footerLi4">
         <strong>Early labor / latent phase (tier "drill"):</strong>
         contractions "20 to 30 seconds" long, "every 30 to 60 minutes";
         NHS describes latent-phase intervals as highly variable — "a few
@@ -207,7 +214,7 @@
         NHS, "Signs that labour has begun" (reviewed 2023-11-09):
         <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>.
       </li>
-      <li>
+      <li data-i18n="footerLi5">
         <strong>Tachysystole / urgent override (tier "critical"):</strong>
         NHS lists as urgent "6 or more contractions every 10 minutes" →
         mean interval &lt; 1.67 min, OR any contraction lasting longer
@@ -217,7 +224,7 @@
         Source: NHS, "Signs that labour has begun" (reviewed 2023-11-09):
         <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>.
       </li>
-      <li>
+      <li data-i18n="footerLi6">
         <strong>Active labor cervical threshold (context only; not used
         in classification):</strong> ACOG/SMFM place the active phase at
         6 cm dilation (Obstetric Care Consensus No. 1, 2014); WHO places
@@ -231,7 +238,7 @@
         NICE NG235:
         <a href="https://www.nice.org.uk/guidance/ng235/chapter/Recommendations" target="_blank" rel="noopener">nice.org.uk/guidance/ng235</a>.
       </li>
-      <li>
+      <li data-i18n="footerLi7">
         <strong>True vs. false labor (qualitative):</strong> ACOG: "True
         labor contractions have a pattern, get closer together as time
         goes on, and each lasts about 60 or 90 seconds ... continue even
@@ -243,8 +250,8 @@
       </li>
     </ol>
 
-    <h2>// GO TO HOSPITAL REGARDLESS OF THIS APP IF //</h2>
-    <p>
+    <h2 data-i18n="footerHospitalH2">// GO TO HOSPITAL REGARDLESS OF THIS APP IF //</h2>
+    <p data-i18n="footerHospitalP">
       Water breaks (especially if smelly or coloured), vaginal bleeding,
       reduced fetal movement, constant severe pain with no relief between
       contractions, under 37 weeks with suspected labour, contractions
@@ -253,8 +260,8 @@
       (2023-11-09); ACOG FAQ, "How to Tell When Labor Begins."
     </p>
 
-    <h2>// APP LIMITATIONS //</h2>
-    <p class="limits">
+    <h2 data-i18n="footerLimitsH2">// APP LIMITATIONS //</h2>
+    <p class="limits" data-i18n="footerLimitsP">
       (1) Duration data is either <strong>measured</strong> (via the
       "I CAN'T COUNT" auto-timer button) or <strong>bucketed</strong> (via a tap
       on one of the 4 Ow-buttons, in which case the stored duration is
@@ -278,6 +285,365 @@
   </footer>
 
 <script>
+// --- i18n --------------------------------------------------------------
+// Detect browser locale. Anything starting with "el" (Greek) → Greek;
+// otherwise fall back to English. The Greek pool re-themes the humor
+// from a rocket launch to launching the Argo — the Argonauts' ship.
+const I18N = {
+  en: {
+    title: "EIS COUNTDOWN",
+    subtitle: "// payload launch monitor · convergence target: T-5min //",
+    sharedBannerLabel: "// SHARED VIEW //",
+    sharedBannerText: " — read-only snapshot",
+    sharedBannerSuffix: ". Input controls are disabled.",
+    sharedSaveBtn: "SAVE TO THIS DEVICE (overwrites local)",
+    sharedExitBtn: "EXIT SHARED VIEW",
+    howtoSummary: "// HOW TO USE THIS APP //",
+    howtoLi1: `<strong>After each contraction</strong>, tap one of the four colored buttons below based on <em>how long</em> the contraction lasted: <code>Ow</code> (under 30 seconds), <code>Oooow</code> (30–60 s), <code>Oooooow</code> (60–120 s), or <code>Oooo….w!</code> (over 2 minutes). The labels refer only to <em>duration</em>, not pain intensity. This is the fastest mode and doesn't need the app to be open during the contraction.`,
+    howtoLi2: `<strong>If you want a precise measurement</strong> and the app is already open, tap <code>I CAN'T COUNT</code> when the contraction <em>starts</em> and tap again when it <em>ends</em>. The robot will time it for you down to the second.`,
+    howtoLi3: `<strong>Watch the graph and the yellow status line.</strong> Each dot is one interval between contractions. As labor progresses, dots should drift toward the dashed green line at 5 minutes. The status line tells you, with robot humor, which stage the pattern looks like.`,
+    howtoLi4: `<strong>The 5-1-1 rule.</strong> The standard guideline is to go to the hospital when contractions are about 5 minutes apart, each about 1 minute long, and that pattern has held for about 1 hour. The app will show <code>5-1-1 sustained(1h): YES</code> when that condition is met.`,
+    howtoLi5: `<strong>Export</strong> the log as JSON or CSV (bottom of the page) if you want a record for your midwife or OB.`,
+    howtoWarn: `⚠ <strong>Override signals — go straight to your maternity unit regardless of what this app says:</strong> waters break, vaginal bleeding, reduced fetal movement, constant severe pain between contractions, under 37 weeks with suspected labour, any contraction lasting longer than 2 minutes, 6+ contractions in 10 minutes, or a strong urge to push.`,
+    bucketHeyLabel: "Ow",       bucketHeySub: "< 30 s",
+    bucketOwLabel: "Oooow",     bucketOwSub: "30 – 60 s",
+    bucketOuchLabel: "Oooooow", bucketOuchSub: "60 – 120 s",
+    bucketYikesLabel: "Oooo….w!", bucketYikesSub: "> 120 s",
+    autoTimerIdle: "I CAN'T COUNT",
+    timerCounting: (mm, ss) => `COUNTING… ${mm}:${ss}  (tap to stop)`,
+    timerHint: "// tap once when the contraction starts, tap again when it ends — measures exact duration in seconds //",
+    initialInfo: "Telemetry buffer empty. Awaiting first pulse.",
+    exportJsonBtn: "DOWNLOAD TELEMETRY (.json)",
+    exportCsvBtn: "DOWNLOAD TELEMETRY (.csv)",
+    shareBtn: "COPY SHARE LINK",
+    shareBtnCopied: "LINK COPIED ✓",
+    clearBtn: "PURGE LOG",
+    purgeConfirm: "PURGE ALL TELEMETRY? This unit cannot undo.",
+    noShareTelemetry: "No telemetry to share yet.",
+    linkCopyPrompt: "Copy this link:",
+    sharedSaveConfirm: "Save this shared snapshot to THIS device? Any local telemetry already on this device will be overwritten.",
+    sharedMeta: (n, first, last) => ` (${n} pulses, ${first} → ${last})`,
+    yAxisLabel: "Δ minutes between pulses (cap 60)",
+    targetLineLabel: "T-5 EIS target",
+    awaitingSecond: "// awaiting second pulse to compute Δ telemetry //",
+    infoPulse: (pulseStr, ts, durStr, lastDelta, deltasN, avg, sigma, avgDurSec, durCount, sustained, cfPct) =>
+      `PULSE ${pulseStr} @ ${ts}` +
+      ` — dur last: ${durStr}` +
+      ` | Δ last: ${lastDelta} min` +
+      ` | avg Δ(${deltasN}): ${avg} min` +
+      ` | σ: ${sigma} min` +
+      (avgDurSec !== null ? ` | avg dur(${durCount}): ${avgDurSec} s` : " | avg dur: —") +
+      ` | 5-1-1 sustained(1h): ${sustained ? "YES" : "no"}` +
+      ` | heuristic convergence: ${cfPct}%`,
+    infoFirst: (ts, durStr) => `PULSE 001 @ ${ts} — dur: ${durStr} | Δ: — | σ: — | convergence: —`,
+    footerDisclaimer: `⚠ <strong>NOT A MEDICAL DEVICE.</strong> This app is a toy companion for timing intervals between contractions. It does not diagnose labor, does not replace clinical judgement, and cannot substitute for contact with a qualified healthcare provider. If in doubt, call your midwife, OB, or maternity unit.`,
+    footerThresholdsH2: "// THRESHOLDS AND SOURCES //",
+    footerLi1: `<strong>5-1-1 rule (tier "prep"):</strong> contractions ~5 minutes apart, each ~1 minute long, sustained for ~1 hour before going to the hospital. The app verifies the 5-minute interval and the 1-hour sustained span. When duration data exists (either the "I CAN'T COUNT" auto-timer or any Ow-bucket tap), the app also verifies avg duration ≥ 55 s (Mayo active-labor range 60–90 s, see [2]); otherwise the duration half must be confirmed by the operator. Source: Cleveland Clinic, "Stages of Labor" (reviewed 2025-04-23): <a href="https://my.clevelandclinic.org/health/body/22640-stages-of-labor" target="_blank" rel="noopener">clevelandclinic.org/…/stages-of-labor</a>.`,
+    footerLi2: `<strong>Duration buckets (Ow / Oooow / Oooooow / Oooo….w!):</strong> boundaries at 30 / 60 / 120 s come directly from published ranges. &lt; 30 s = early-labor duration range per Cleveland Clinic, "Contractions" (updated 2024-08-08): <a href="https://my.clevelandclinic.org/health/symptoms/contractions" target="_blank" rel="noopener">clevelandclinic.org/…/contractions</a>. 60–120 s overlaps Mayo Clinic's active-labor range of "60 to 90 seconds" per "Stages of labor and birth": <a href="https://www.mayoclinic.org/healthy-lifestyle/labor-and-delivery/in-depth/stages-of-labor/art-20046545" target="_blank" rel="noopener">mayoclinic.org/…/stages-of-labor</a>. &gt; 120 s is the NHS urgent-contact override in "Signs that labour has begun" (reviewed 2023-11-09): <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>. Each bucket stores the range midpoint as an estimated <code>duration_sec</code> with a <code>bucket:*</code> source tag so measured and estimated data stay distinguishable on export.`,
+    footerLi3: `<strong>Active labor contractions (tier "imminent"):</strong> "every two to five minutes, lasting about 60 to 90 seconds." The app uses <em>avg &lt; 3 min</em> as a proxy for deep active labor. Source: Mayo Clinic, "Stages of labor and birth": <a href="https://www.mayoclinic.org/healthy-lifestyle/labor-and-delivery/in-depth/stages-of-labor/art-20046545" target="_blank" rel="noopener">mayoclinic.org/…/stages-of-labor</a>.`,
+    footerLi4: `<strong>Early labor / latent phase (tier "drill"):</strong> contractions "20 to 30 seconds" long, "every 30 to 60 minutes"; NHS describes latent-phase intervals as highly variable — "a few minutes ... or half an hour or even longer." Sources: Cleveland Clinic, "Contractions" (updated 2024-08-08): <a href="https://my.clevelandclinic.org/health/symptoms/contractions" target="_blank" rel="noopener">clevelandclinic.org/…/contractions</a>; NHS, "Signs that labour has begun" (reviewed 2023-11-09): <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>.`,
+    footerLi5: `<strong>Tachysystole / urgent override (tier "critical"):</strong> NHS lists as urgent "6 or more contractions every 10 minutes" → mean interval &lt; 1.67 min, OR any contraction lasting longer than 2 minutes (&gt; 120 s). The app enforces BOTH halves: the interval check always, and the duration check whenever the last contraction has duration data (from the auto-timer or a bucket tap). Source: NHS, "Signs that labour has begun" (reviewed 2023-11-09): <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>.`,
+    footerLi6: `<strong>Active labor cervical threshold (context only; not used in classification):</strong> ACOG/SMFM place the active phase at 6 cm dilation (Obstetric Care Consensus No. 1, 2014); WHO places it at 5 cm (Labour Care Guide, 2020); NICE uses 4 cm (NG235, 2023-09-29). The app cannot measure dilation and does not use this threshold — listed here to explain why tier names do not rely on it. Sources: ACOG OCC #1 (2014, via AJOG): <a href="https://www.ajog.org/article/S0002-9378(14)00055-6/fulltext" target="_blank" rel="noopener">ajog.org</a>; WHO Labour Care Guide (2020): <a href="https://iris.who.int/bitstream/handle/10665/337693/9789240017566-eng.pdf" target="_blank" rel="noopener">iris.who.int</a>; NICE NG235: <a href="https://www.nice.org.uk/guidance/ng235/chapter/Recommendations" target="_blank" rel="noopener">nice.org.uk/guidance/ng235</a>.`,
+    footerLi7: `<strong>True vs. false labor (qualitative):</strong> ACOG: "True labor contractions have a pattern, get closer together as time goes on, and each lasts about 60 or 90 seconds ... continue even when you rest or move around." No guideline publishes a numeric variance / σ threshold. The app's σ display is a visual aid only and is NOT used in classification. Source: ACOG FAQ, "How to Tell When Labor Begins": <a href="https://www.acog.org/womens-health/faqs/how-to-tell-when-labor-begins" target="_blank" rel="noopener">acog.org/…/how-to-tell-when-labor-begins</a>.`,
+    footerHospitalH2: "// GO TO HOSPITAL REGARDLESS OF THIS APP IF //",
+    footerHospitalP: `Water breaks (especially if smelly or coloured), vaginal bleeding, reduced fetal movement, constant severe pain with no relief between contractions, under 37 weeks with suspected labour, contractions lasting longer than 2 minutes, 6+ contractions in 10 minutes, or a strong urge to push. Sources: NHS, "Signs that labour has begun" (2023-11-09); ACOG FAQ, "How to Tell When Labor Begins."`,
+    footerLimitsH2: "// APP LIMITATIONS //",
+    footerLimitsP: `(1) Duration data is either <strong>measured</strong> (via the "I CAN'T COUNT" auto-timer button) or <strong>bucketed</strong> (via a tap on one of the 4 Ow-buttons, in which case the stored duration is the midpoint of the selected range — 20 / 45 / 90 / 150 s). When no duration data is present, the "~1 minute long" half of the 5-1-1 rule falls back to operator confirmation. (2) The rolling statistics window is the last 5 intervals; the 1-hour "sustained" check uses all presses in the last ~65 minutes. (3) No guideline publishes a numeric regularity/σ threshold, so σ and the "heuristic convergence" percent are display-only and do not drive classification. (4) ACOG/WHO/NICE disagree on the cervical dilation marker for active labor (6 cm / 5 cm / 4 cm) — the app cannot measure dilation and does not depend on this. (5) The app does not know about water breaking, bleeding, or other override signals listed above; the operator must act on those independently. (6) "I CAN'T COUNT" relies on the app staying open between the start and end taps; if you close the tab or reload the page mid-contraction the timer is lost — use a bucket button after the fact in that case.`,
+    status: {
+      idle: [
+        "SYSTEM IDLE — payload secured in launchpad.",
+        "Booting telemetry. Nothing to report. Unit suspects nothing ever will be.",
+        "Standing by. Payload remains in cryosleep, possibly dreaming of snacks.",
+        "This unit is fully operational and incredibly bored.",
+        "No data. No pulse. No problem. Yet.",
+      ],
+      first: [
+        "PULSE 001 ACQUIRED — the science begins.",
+        "One data point logged. Statisticians would like a stern word.",
+        "First pulse registered. Unit cannot yet distinguish contraction from sneeze.",
+        "Telemetry link established. Please press the button again within your lifetime.",
+        "Initial pulse detected. Starting the world's most nervous stopwatch.",
+      ],
+      drill: [
+        "NOMINAL — test succeeded. Payload unimpressed.",
+        "STATUS GREEN — this is almost certainly indigestion.",
+        "Pre-flight checklist: 1/47 complete. Relax, put on a documentary.",
+        "Subsystems humming. Payload busy rearranging internal organs for sport.",
+        "This is fine. This is a drill. This is Braxton-Hicks-adjacent fine.",
+        "STANDBY — payload has declined to file a flight plan.",
+        "Long interval detected. Unit suspects false alarm. Refunds unavailable.",
+        "Launch window: literally not today.",
+        "Mission control recommends: snacks, hydration, mild skepticism.",
+        "No convergence detected. Payload filing paperwork in triplicate.",
+      ],
+      warming: [
+        "PRE-IGNITION RUMBLE — things are happening. Slowly. Bureaucratically.",
+        "Subsystems warming. Payload reviewing exit procedures in the manual.",
+        "Intervals decreasing. This unit is cautiously optimistic, for a robot.",
+        "RUMBLE DETECTED — locate hospital bag, verify bag contains pants.",
+        "Propulsion sequence initializing. Estimated departure: sometime-ish.",
+        "Early convergence signs. Payload is stretching. Literally.",
+        "Pre-launch jitters detected — in the payload AND the operator.",
+        "STATUS AMBER — you are now eligible for nervous pacing.",
+        "Interval trend: shrinking. Confidence: still robot-low.",
+        "Warming up. Unit recommends finishing that episode NOW.",
+      ],
+      approach: [
+        "APPROACH PHASE — trajectory nominal-ish. Warm up the launch vehicle.",
+        "This is no longer a drill. Possibly. Probably. Update pending.",
+        "Convergence detected. Unit 74% confident. Remaining 26% is panic.",
+        "Recommend driver of launch vehicle consume coffee but remain road-legal.",
+        "Intervals tightening. Payload means business.",
+        "APPROACH CORRIDOR ACQUIRED — charge phone, grab keys, breathe.",
+        "T-minus: eventually. Probably eventually soon.",
+        "Unit upgrades forecast from 'maybe' to 'oh'.",
+        "Prepare for launch — slowly, with dignity. No running yet.",
+        "Converging. Converging. Converging. [distant kazoo sounds]",
+      ],
+      prep: [
+        "PREPARE FOR LAUNCH — convergence corridor locked. Coordinates: hospital.",
+        "Launch window opening. Unit strongly suggests putting shoes on.",
+        "This is it. Probably. Almost certainly this. Get in the car.",
+        "CONVERGENCE CONFIRMED — 5-minute cadence holding. Do the thing.",
+        "STATUS RED — payload filing formal intent to disembark.",
+        "Unit recommends: keys, towels, calm voice, actual driving.",
+        "LAUNCH PREP — countdown holding at T-nowish.",
+        "Regularity achieved. Proceed to launch facility — urgent, but ticket-free.",
+        "GO FOR LAUNCH — this unit is legally obligated to tell you to move.",
+        "5-minute cadence locked. Biology has taken the controls.",
+      ],
+      imminent: [
+        "LAUNCH IMMINENT — good luck, human.",
+        "EIS WINDOW CONFIRMED — payload has filed notice. GO.",
+        "IGNITION SEQUENCE ENGAGED — this unit is not qualified to help further.",
+        "T-MINUS SHORT — recommend being already at the hospital.",
+        "This unit wishes to formally clock out of this situation.",
+        "CONVERGENCE LOCKED — payload demanding exit visa. GRANTED.",
+        "Good luck, brave meat pilot. This is your finest hour.",
+        "LAUNCH IMMINENT — for legal reasons, please already be at a hospital.",
+        "EIS ACHIEVED — payload egress imminent. Unit salutes you.",
+        "This is the part where the humans take over. Godspeed.",
+      ],
+      critical: [
+        "EMERGENCY DEORBIT — GOOD LUCK HUMAN.",
+        "UNSCHEDULED RAPID DELIVERY — catch the payload, do NOT drop it.",
+        "THIS UNIT IS NOT QUALIFIED TO CATCH. GOOD LUCK.",
+        "ABORT ABORT ABORT — wait no, the opposite. LAUNCH LAUNCH LAUNCH.",
+        "EMERGENCY SEPARATION — deploy hospital or towels, whichever is closer.",
+        "Payload has achieved main-character energy. Unit stepping aside.",
+        "CRITICAL CADENCE — if not at hospital, hospital must come to you.",
+        "This is happening. This is happening NOW. Unit apologizes for the tone.",
+        "RAPID UNSCHEDULED DISASSEMBLY OF LABOR PHASE — go go go.",
+        "MAYDAY MAYDAY — biological launch in progress. Unit recusing self.",
+      ],
+    },
+  },
+
+  el: {
+    title: "ΑΡΓΩ — ΑΝΤΙΣΤΡΟΦΗ ΜΕΤΡΗΣΗ",
+    subtitle: "// παρακολούθηση καθέλκυσης · στόχος σύγκλισης: T-5 λεπτά //",
+    sharedBannerLabel: "// ΚΟΙΝΟΧΡΗΣΤΗ ΠΡΟΒΟΛΗ //",
+    sharedBannerText: " — στιγμιότυπο μόνο για ανάγνωση",
+    sharedBannerSuffix: ". Τα χειριστήρια εισόδου είναι απενεργοποιημένα.",
+    sharedSaveBtn: "ΑΠΟΘΗΚΕΥΣΗ ΣΕ ΑΥΤΗ ΤΗ ΣΥΣΚΕΥΗ (αντικαθιστά τα τοπικά)",
+    sharedExitBtn: "ΕΞΟΔΟΣ ΑΠΟ ΚΟΙΝΟΧΡΗΣΤΗ ΠΡΟΒΟΛΗ",
+    howtoSummary: "// ΠΩΣ ΝΑ ΧΡΗΣΙΜΟΠΟΙΗΣΕΤΕ ΑΥΤΗ ΤΗΝ ΕΦΑΡΜΟΓΗ //",
+    howtoLi1: `<strong>Μετά από κάθε συστολή</strong>, πάτα ένα από τα τέσσερα χρωματιστά κουμπιά παρακάτω, ανάλογα με το <em>πόσο κράτησε</em> η συστολή: <code>Αχ</code> (κάτω από 30 δευτερόλεπτα), <code>Αααχ</code> (30–60 δ), <code>Αααααχ</code> (60–120 δ), ή <code>Ωωωω….χ!</code> (πάνω από 2 λεπτά). Οι ετικέτες αναφέρονται μόνο στη <em>διάρκεια</em>, όχι στην ένταση του πόνου. Είναι ο πιο γρήγορος τρόπος και δεν χρειάζεται η εφαρμογή να είναι ανοιχτή κατά τη συστολή.`,
+    howtoLi2: `<strong>Αν θέλεις ακριβή μέτρηση</strong> και η εφαρμογή είναι ήδη ανοιχτή, πάτα <code>ΔΕΝ ΜΠΟΡΩ ΝΑ ΜΕΤΡΗΣΩ</code> όταν η συστολή <em>αρχίζει</em> και πάτα ξανά όταν <em>τελειώνει</em>. Το ρομπότ θα τη χρονομετρήσει για σένα με ακρίβεια δευτερολέπτου.`,
+    howtoLi3: `<strong>Παρακολούθησε το γράφημα και την κίτρινη γραμμή κατάστασης.</strong> Κάθε κουκίδα είναι ένα διάστημα μεταξύ συστολών. Καθώς προχωρά ο τοκετός, οι κουκίδες πρέπει να πλησιάζουν την πράσινη διακεκομμένη γραμμή στα 5 λεπτά. Η γραμμή κατάστασης σου λέει, με ρομπο-χιούμορ, σε ποιο στάδιο μοιάζει το μοτίβο.`,
+    howtoLi4: `<strong>Ο κανόνας 5-1-1.</strong> Ο πρότυπος οδηγός είναι να πηγαίνεις στο μαιευτήριο όταν οι συστολές απέχουν περίπου 5 λεπτά, διαρκούν περίπου 1 λεπτό η καθεμία, και το μοτίβο κρατά για περίπου 1 ώρα. Η εφαρμογή θα δείξει <code>5-1-1 σταθερό(1ω): ΝΑΙ</code> όταν πληρείται η συνθήκη.`,
+    howtoLi5: `<strong>Εξαγωγή</strong> του ημερολογίου ως JSON ή CSV (στο τέλος της σελίδας) αν θέλεις αρχείο για τη μαία ή τον μαιευτήρα σου.`,
+    howtoWarn: `⚠ <strong>Σήματα υπέρβασης — πήγαινε απευθείας στο μαιευτήριο ανεξάρτητα από το τι λέει αυτή η εφαρμογή:</strong> σπάσιμο υγρών, κολπική αιμορραγία, μειωμένη εμβρυϊκή κίνηση, συνεχής έντονος πόνος μεταξύ συστολών, κάτω από 37 εβδομάδες με υποψία τοκετού, οποιαδήποτε συστολή διαρκεί πάνω από 2 λεπτά, 6+ συστολές σε 10 λεπτά, ή έντονη επιθυμία για ώθηση.`,
+    bucketHeyLabel: "Αχ",         bucketHeySub: "< 30 δ",
+    bucketOwLabel: "Αααχ",        bucketOwSub: "30 – 60 δ",
+    bucketOuchLabel: "Αααααχ",    bucketOuchSub: "60 – 120 δ",
+    bucketYikesLabel: "Ωωωω….χ!", bucketYikesSub: "> 120 δ",
+    autoTimerIdle: "ΔΕΝ ΜΠΟΡΩ ΝΑ ΜΕΤΡΗΣΩ",
+    timerCounting: (mm, ss) => `ΜΕΤΡΩ… ${mm}:${ss}  (πάτα για στάση)`,
+    timerHint: "// πάτα μία φορά όταν αρχίζει η συστολή, πάτα ξανά όταν τελειώνει — μετρά ακριβή διάρκεια σε δευτερόλεπτα //",
+    initialInfo: "Ναυτικό ημερολόγιο άδειο. Αναμονή πρώτης κουπιάς.",
+    exportJsonBtn: "ΛΗΨΗ ΗΜΕΡΟΛΟΓΙΟΥ (.json)",
+    exportCsvBtn: "ΛΗΨΗ ΗΜΕΡΟΛΟΓΙΟΥ (.csv)",
+    shareBtn: "ΑΝΤΙΓΡΑΦΗ ΣΥΝΔΕΣΜΟΥ",
+    shareBtnCopied: "ΣΥΝΔΕΣΜΟΣ ΑΝΤΙΓΡΑΦΗΚΕ ✓",
+    clearBtn: "ΕΚΚΑΘΑΡΙΣΗ",
+    purgeConfirm: "ΕΚΚΑΘΑΡΙΣΗ ΟΛΩΝ ΤΩΝ ΔΕΔΟΜΕΝΩΝ; Η μονάδα δεν μπορεί να επαναφέρει.",
+    noShareTelemetry: "Δεν υπάρχουν δεδομένα για κοινοποίηση ακόμη.",
+    linkCopyPrompt: "Αντιγράψτε αυτόν τον σύνδεσμο:",
+    sharedSaveConfirm: "Αποθήκευση αυτού του κοινόχρηστου στιγμιότυπου σε ΑΥΤΗΝ τη συσκευή; Τυχόν τοπικά δεδομένα σε αυτή τη συσκευή θα αντικατασταθούν.",
+    sharedMeta: (n, first, last) => ` (${n} κουπιές, ${first} → ${last})`,
+    yAxisLabel: "Δ λεπτά μεταξύ κουπιών (όριο 60)",
+    targetLineLabel: "Στόχος T-5",
+    awaitingSecond: "// αναμονή δεύτερης κουπιάς για υπολογισμό Δ //",
+    infoPulse: (pulseStr, ts, durStr, lastDelta, deltasN, avg, sigma, avgDurSec, durCount, sustained, cfPct) =>
+      `ΚΟΥΠΙΑ ${pulseStr} @ ${ts}` +
+      ` — διάρκ. τελ: ${durStr}` +
+      ` | Δ τελ: ${lastDelta} λ` +
+      ` | μ.ο. Δ(${deltasN}): ${avg} λ` +
+      ` | σ: ${sigma} λ` +
+      (avgDurSec !== null ? ` | μ.ο. διάρκ.(${durCount}): ${avgDurSec} δ` : " | μ.ο. διάρκ.: —") +
+      ` | 5-1-1 σταθερό(1ω): ${sustained ? "ΝΑΙ" : "όχι"}` +
+      ` | ευρετική σύγκλιση: ${cfPct}%`,
+    infoFirst: (ts, durStr) => `ΚΟΥΠΙΑ 001 @ ${ts} — διάρκ: ${durStr} | Δ: — | σ: — | σύγκλιση: —`,
+    footerDisclaimer: `⚠ <strong>ΔΕΝ ΕΙΝΑΙ ΙΑΤΡΙΚΗ ΣΥΣΚΕΥΗ.</strong> Αυτή η εφαρμογή είναι ένα παιχνιδιάρικο βοήθημα για τη χρονομέτρηση διαστημάτων μεταξύ συστολών. Δεν διαγιγνώσκει τοκετό, δεν αντικαθιστά την κλινική κρίση, και δεν μπορεί να υποκαταστήσει την επαφή με εξειδικευμένο επαγγελματία υγείας. Σε περίπτωση αμφιβολίας, καλέστε τη μαία, τον μαιευτήρα ή το μαιευτήριό σας.`,
+    footerThresholdsH2: "// ΟΡΙΑ ΚΑΙ ΠΗΓΕΣ //",
+    footerLi1: `<strong>Κανόνας 5-1-1 (βαθμίδα «prep»):</strong> συστολές με απόσταση ~5 λεπτών, διάρκεια ~1 λεπτό η καθεμία, σταθερά για ~1 ώρα πριν την επίσκεψη στο μαιευτήριο. Η εφαρμογή επαληθεύει το διάστημα των 5 λεπτών και το εύρος της 1 ώρας. Όταν υπάρχουν δεδομένα διάρκειας (είτε από το αυτόματο χρονόμετρο «ΔΕΝ ΜΠΟΡΩ ΝΑ ΜΕΤΡΗΣΩ» είτε από πάτημα κουμπιού Αχ), η εφαρμογή επαληθεύει επίσης μέσο όρο διάρκειας ≥ 55 δ (εύρος ενεργού τοκετού Mayo 60–90 δ, βλ. [2])· διαφορετικά το σκέλος της διάρκειας πρέπει να επιβεβαιωθεί από τον χειριστή. Πηγή: Cleveland Clinic, «Stages of Labor» (αναθεώρηση 2025-04-23): <a href="https://my.clevelandclinic.org/health/body/22640-stages-of-labor" target="_blank" rel="noopener">clevelandclinic.org/…/stages-of-labor</a>.`,
+    footerLi2: `<strong>Κουβάδες διάρκειας (Αχ / Αααχ / Αααααχ / Ωωωω….χ!):</strong> τα όρια στα 30 / 60 / 120 δ προέρχονται απευθείας από δημοσιευμένα εύρη. &lt; 30 δ = εύρος διάρκειας πρώιμου τοκετού κατά Cleveland Clinic, «Contractions» (ενημέρωση 2024-08-08): <a href="https://my.clevelandclinic.org/health/symptoms/contractions" target="_blank" rel="noopener">clevelandclinic.org/…/contractions</a>. 60–120 δ επικαλύπτει το εύρος ενεργού τοκετού της Mayo Clinic «60 με 90 δευτερόλεπτα» από το «Stages of labor and birth»: <a href="https://www.mayoclinic.org/healthy-lifestyle/labor-and-delivery/in-depth/stages-of-labor/art-20046545" target="_blank" rel="noopener">mayoclinic.org/…/stages-of-labor</a>. &gt; 120 δ είναι το σημείο επείγουσας υπέρβασης του NHS στο «Signs that labour has begun» (αναθεώρηση 2023-11-09): <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>. Κάθε κουβάς αποθηκεύει το μέσο σημείο του εύρους ως εκτιμώμενη <code>duration_sec</code> με ετικέτα πηγής <code>bucket:*</code> ώστε τα μετρημένα και εκτιμώμενα δεδομένα να παραμένουν διακριτά κατά την εξαγωγή.`,
+    footerLi3: `<strong>Συστολές ενεργού τοκετού (βαθμίδα «imminent»):</strong> «κάθε δύο με πέντε λεπτά, διαρκώντας περίπου 60 με 90 δευτερόλεπτα». Η εφαρμογή χρησιμοποιεί <em>μ.ο. &lt; 3 λ</em> ως υποκατάστατο για βαθύ ενεργό τοκετό. Πηγή: Mayo Clinic, «Stages of labor and birth»: <a href="https://www.mayoclinic.org/healthy-lifestyle/labor-and-delivery/in-depth/stages-of-labor/art-20046545" target="_blank" rel="noopener">mayoclinic.org/…/stages-of-labor</a>.`,
+    footerLi4: `<strong>Πρώιμος τοκετός / λανθάνουσα φάση (βαθμίδα «drill»):</strong> συστολές «20 με 30 δευτερόλεπτα», «κάθε 30 με 60 λεπτά»· το NHS περιγράφει τα διαστήματα της λανθάνουσας φάσης ως εξαιρετικά μεταβλητά — «λίγα λεπτά ... ή μισή ώρα ή ακόμη περισσότερο». Πηγές: Cleveland Clinic, «Contractions» (ενημέρωση 2024-08-08): <a href="https://my.clevelandclinic.org/health/symptoms/contractions" target="_blank" rel="noopener">clevelandclinic.org/…/contractions</a>· NHS, «Signs that labour has begun» (αναθεώρηση 2023-11-09): <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>.`,
+    footerLi5: `<strong>Ταχυσυστολία / επείγουσα υπέρβαση (βαθμίδα «critical»):</strong> το NHS αναφέρει ως επείγον «6 ή περισσότερες συστολές κάθε 10 λεπτά» → μέσο διάστημα &lt; 1.67 λ, Ή οποιαδήποτε συστολή που διαρκεί περισσότερο από 2 λεπτά (&gt; 120 δ). Η εφαρμογή εφαρμόζει ΚΑΙ τα δύο σκέλη: τον έλεγχο διαστήματος πάντα, και τον έλεγχο διάρκειας όταν η τελευταία συστολή έχει δεδομένα διάρκειας (από το χρονόμετρο ή από πάτημα κουβά). Πηγή: NHS, «Signs that labour has begun» (αναθεώρηση 2023-11-09): <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>.`,
+    footerLi6: `<strong>Όριο διαστολής τραχήλου για ενεργό τοκετό (πλαίσιο μόνο· δεν χρησιμοποιείται στην ταξινόμηση):</strong> ACOG/SMFM τοποθετούν την ενεργό φάση στα 6 cm διαστολής (Obstetric Care Consensus No. 1, 2014)· ο ΠΟΥ στα 5 cm (Labour Care Guide, 2020)· το NICE στα 4 cm (NG235, 2023-09-29). Η εφαρμογή δεν μπορεί να μετρήσει διαστολή και δεν χρησιμοποιεί αυτό το όριο — αναφέρεται εδώ για να εξηγήσει γιατί τα ονόματα των βαθμίδων δεν στηρίζονται σε αυτό. Πηγές: ACOG OCC #1 (2014, via AJOG): <a href="https://www.ajog.org/article/S0002-9378(14)00055-6/fulltext" target="_blank" rel="noopener">ajog.org</a>· WHO Labour Care Guide (2020): <a href="https://iris.who.int/bitstream/handle/10665/337693/9789240017566-eng.pdf" target="_blank" rel="noopener">iris.who.int</a>· NICE NG235: <a href="https://www.nice.org.uk/guidance/ng235/chapter/Recommendations" target="_blank" rel="noopener">nice.org.uk/guidance/ng235</a>.`,
+    footerLi7: `<strong>Αληθής έναντι ψευδούς τοκετού (ποιοτικά):</strong> ACOG: «Οι αληθείς συστολές τοκετού έχουν μοτίβο, πλησιάζουν μεταξύ τους καθώς περνά ο χρόνος, και η καθεμία διαρκεί περίπου 60 ή 90 δευτερόλεπτα ... συνεχίζουν ακόμη κι όταν ξεκουράζεσαι ή κινείσαι». Κανένας οδηγός δεν δημοσιεύει αριθμητικό όριο διακύμανσης / σ. Η εμφάνιση σ της εφαρμογής είναι μόνο οπτικό βοήθημα και ΔΕΝ χρησιμοποιείται στην ταξινόμηση. Πηγή: ACOG FAQ, «How to Tell When Labor Begins»: <a href="https://www.acog.org/womens-health/faqs/how-to-tell-when-labor-begins" target="_blank" rel="noopener">acog.org/…/how-to-tell-when-labor-begins</a>.`,
+    footerHospitalH2: "// ΠΗΓΑΙΝΕ ΣΤΟ ΜΑΙΕΥΤΗΡΙΟ ΑΝΕΞΑΡΤΗΤΑ ΑΠΟ ΤΗΝ ΕΦΑΡΜΟΓΗ ΑΝ //",
+    footerHospitalP: `Σπάσιμο υγρών (ειδικά αν μυρίζουν ή είναι χρωματισμένα), κολπική αιμορραγία, μειωμένη εμβρυϊκή κίνηση, συνεχής έντονος πόνος χωρίς ανακούφιση μεταξύ συστολών, κάτω από 37 εβδομάδες με υποψία τοκετού, συστολές που διαρκούν πάνω από 2 λεπτά, 6+ συστολές σε 10 λεπτά, ή έντονη επιθυμία για ώθηση. Πηγές: NHS, «Signs that labour has begun» (2023-11-09)· ACOG FAQ, «How to Tell When Labor Begins».`,
+    footerLimitsH2: "// ΠΕΡΙΟΡΙΣΜΟΙ ΕΦΑΡΜΟΓΗΣ //",
+    footerLimitsP: `(1) Τα δεδομένα διάρκειας είναι είτε <strong>μετρημένα</strong> (μέσω του αυτόματου χρονομέτρου «ΔΕΝ ΜΠΟΡΩ ΝΑ ΜΕΤΡΗΣΩ») είτε <strong>κουβαδισμένα</strong> (μέσω πατήματος ενός από τα 4 κουμπιά Αχ, οπότε η αποθηκευμένη διάρκεια είναι το μέσο σημείο του επιλεγμένου εύρους — 20 / 45 / 90 / 150 δ). Όταν δεν υπάρχουν δεδομένα διάρκειας, το σκέλος «~1 λεπτό διάρκεια» του κανόνα 5-1-1 καταφεύγει σε επιβεβαίωση από τον χειριστή. (2) Το κυλιόμενο παράθυρο στατιστικών είναι τα τελευταία 5 διαστήματα· ο έλεγχος «σταθερό» 1 ώρας χρησιμοποιεί όλα τα πατήματα στα τελευταία ~65 λεπτά. (3) Κανένας οδηγός δεν δημοσιεύει αριθμητικό όριο κανονικότητας/σ, οπότε το σ και το ποσοστό «ευρετικής σύγκλισης» είναι μόνο για εμφάνιση και δεν καθοδηγούν την ταξινόμηση. (4) ACOG/WHO/NICE διαφωνούν για τον δείκτη διαστολής τραχήλου για τον ενεργό τοκετό (6 cm / 5 cm / 4 cm) — η εφαρμογή δεν μπορεί να μετρήσει διαστολή και δεν εξαρτάται από αυτό. (5) Η εφαρμογή δεν γνωρίζει για σπάσιμο υγρών, αιμορραγία ή άλλα σήματα υπέρβασης που αναφέρονται παραπάνω· ο χειριστής πρέπει να ενεργήσει γι' αυτά ανεξάρτητα. (6) Το «ΔΕΝ ΜΠΟΡΩ ΝΑ ΜΕΤΡΗΣΩ» βασίζεται στο ότι η εφαρμογή παραμένει ανοιχτή μεταξύ των πατημάτων αρχής και τέλους· αν κλείσεις την καρτέλα ή ανανεώσεις τη σελίδα στη μέση μιας συστολής, ο χρονομετρητής χάνεται — σε αυτή την περίπτωση, χρησιμοποίησε ένα κουμπί κουβά εκ των υστέρων.`,
+    // Humor re-themed from rocket launch to the Argonauts launching their
+    // ship (η Αργώ). "Πληρωμα" = crew, "κουπιά" = oars, "καθέλκυση" =
+    // ship launch, "ναυπηγείο" = shipyard. Payload ≈ ο νέος Αργοναύτης.
+    status: {
+      idle: [
+        "ΣΥΣΤΗΜΑ ΑΔΡΑΝΕΣ — η Αργώ αγκυροβολημένη στο ναυπηγείο.",
+        "Εκκίνηση ημερολογίου. Τίποτα να αναφερθεί. Η μονάδα υποπτεύεται ότι ποτέ δεν θα υπάρξει.",
+        "Σε αναμονή. Το φορτίο κοιμάται ακόμη, πιθανώς ονειρεύεται μελόπιτες.",
+        "Η μονάδα είναι πλήρως λειτουργική και απίστευτα βαριεστημένη.",
+        "Κανένα δεδομένο. Καμία κουπιά. Κανένα πρόβλημα. Προς το παρόν.",
+      ],
+      first: [
+        "ΚΟΥΠΙΑ 001 ΚΑΤΕΓΡΑΦΗ — η ναυσιπλοΐα ξεκινά.",
+        "Ένα σημείο δεδομένων. Οι στατιστικολόγοι θα ήθελαν μια αυστηρή κουβέντα.",
+        "Πρώτη κουπιά καταχωρήθηκε. Η μονάδα δεν ξεχωρίζει ακόμη συστολή από φτέρνισμα.",
+        "Σύνδεση ναυτικού ημερολογίου εγκαθιδρύθηκε. Πάτα ξανά το κουμπί μέσα στη ζωή σου.",
+        "Αρχική κουπιά εντοπίστηκε. Ξεκινάει το πιο νευρικό χρονόμετρο του κόσμου.",
+      ],
+      drill: [
+        "ΚΑΝΟΝΙΚΑ — δοκιμή επιτυχής. Το φορτίο ανεντυπωσίαστο.",
+        "ΚΑΤΑΣΤΑΣΗ ΠΡΑΣΙΝΗ — πρόκειται σχεδόν σίγουρα για δυσπεψία.",
+        "Λίστα ετοιμασιών προ απόπλου: 1/47 ολοκληρώθηκε. Χαλάρωσε, βάλε ένα ντοκιμαντέρ.",
+        "Τα υποσυστήματα βουίζουν. Το φορτίο ανακατανέμει εσωτερικά όργανα για πλάκα.",
+        "Όλα καλά. Είναι άσκηση. Είναι κάτι σαν Braxton-Hicks.",
+        "ΑΝΑΜΟΝΗ — το φορτίο αρνήθηκε να καταθέσει πορεία ταξιδιού.",
+        "Μεγάλο διάστημα εντοπίστηκε. Η μονάδα υποπτεύεται ψευδή συναγερμό. Επιστροφές χρημάτων μη διαθέσιμες.",
+        "Παράθυρο απόπλου: κυριολεκτικά όχι σήμερα.",
+        "Το Αργώ-Control προτείνει: σνακ, ενυδάτωση, ήπιος σκεπτικισμός.",
+        "Καμία σύγκλιση εντοπίστηκε. Το φορτίο καταθέτει έγγραφα εις τριπλούν.",
+      ],
+      warming: [
+        "ΠΡΟ-ΚΩΠΗΛΑΣΙΑΚΟΣ ΒΡΟΝΤΟΣ — κάτι συμβαίνει. Αργά. Γραφειοκρατικά.",
+        "Τα υποσυστήματα ζεσταίνονται. Το φορτίο διαβάζει τις διαδικασίες εξόδου στο εγχειρίδιο.",
+        "Τα διαστήματα μικραίνουν. Η μονάδα είναι προσεκτικά αισιόδοξη, για ρομπότ.",
+        "ΚΥΜΑΤΙΣΜΟΣ ΕΝΤΟΠΙΣΤΗΚΕ — εντόπισε τσάντα μαιευτηρίου, επιβεβαίωσε ότι έχει παντελόνι.",
+        "Ακολουθία κωπηλασίας αρχικοποιείται. Εκτιμώμενη αναχώρηση: κάπου-εκεί.",
+        "Πρώιμα σημάδια σύγκλισης. Το φορτίο τεντώνεται. Κυριολεκτικά.",
+        "Νευρικότητα προ απόπλου ανιχνεύθηκε — στο φορτίο ΚΑΙ στον χειριστή.",
+        "ΚΑΤΑΣΤΑΣΗ ΠΟΡΤΟΚΑΛΙ — δικαιούσαι πλέον νευρικό βηματισμό.",
+        "Τάση διαστήματος: συρρικνούμενη. Αυτοπεποίθηση: ακόμη χαμηλή ρομπότ-επίπεδο.",
+        "Ζεσταίνεται. Η μονάδα προτείνει να τελειώσεις ΤΩΡΑ αυτό το επεισόδιο.",
+      ],
+      approach: [
+        "ΦΑΣΗ ΠΡΟΣΕΓΓΙΣΗΣ — τροχιά κάπως-κανονικά. Ζέσταινε τα κουπιά.",
+        "Δεν είναι πια άσκηση. Πιθανώς. Ενημέρωση εκκρεμεί.",
+        "Σύγκλιση εντοπίστηκε. Η μονάδα 74% σίγουρη. Το υπόλοιπο 26% είναι πανικός.",
+        "Προτείνεται ο Ιάσων-οδηγός να καταναλώσει καφέ αλλά να παραμείνει οδηγικά νόμιμος.",
+        "Τα διαστήματα σφίγγουν. Το φορτίο σοβαρεύει.",
+        "ΔΙΑΔΡΟΜΟΣ ΠΡΟΣΕΓΓΙΣΗΣ ΑΠΟΚΤΗΘΗΚΕ — φόρτισε τηλέφωνο, πάρε κλειδιά, ανάπνεε.",
+        "T-μείον: κάποια στιγμή. Πιθανώς σχετικά σύντομα.",
+        "Η μονάδα αναβαθμίζει την πρόβλεψη από «ίσως» σε «ωωωπ».",
+        "Προετοιμάσου για καθέλκυση — αργά, με αξιοπρέπεια. Όχι τρέξιμο ακόμη.",
+        "Σύγκλιση. Σύγκλιση. Σύγκλιση. [μακρινός ήχος λύρας]",
+      ],
+      prep: [
+        "ΠΡΟΕΤΟΙΜΑΣΙΑ ΚΑΘΕΛΚΥΣΗΣ — διάδρομος σύγκλισης κλειδωμένος. Συντεταγμένες: μαιευτήριο.",
+        "Παράθυρο καθέλκυσης ανοίγει. Η μονάδα συνιστά επιτακτικά να φορέσεις παπούτσια.",
+        "Αυτό είναι. Πιθανώς. Σχεδόν σίγουρα αυτό. Μπες στο αμάξι.",
+        "ΣΥΓΚΛΙΣΗ ΕΠΙΒΕΒΑΙΩΜΕΝΗ — ρυθμός 5 λεπτών κρατάει. Κάν' το.",
+        "ΚΑΤΑΣΤΑΣΗ ΚΟΚΚΙΝΗ — το φορτίο καταθέτει επίσημη πρόθεση αποβίβασης.",
+        "Η μονάδα προτείνει: κλειδιά, πετσέτες, ήρεμη φωνή, πραγματική οδήγηση.",
+        "ΠΡΟΕΤΟΙΜΑΣΙΑ ΑΠΟΠΛΟΥ — αντίστροφη μέτρηση στο T-τώρα-κάπως.",
+        "Κανονικότητα επιτεύχθηκε. Πορεία προς το ναυπηγείο-μαιευτήριο — επείγον αλλά χωρίς κλήσεις τροχαίας.",
+        "ΕΝΤΟΛΗ ΚΑΘΕΛΚΥΣΗΣ — η μονάδα υποχρεούται νομικά να σου πει να κινηθείς.",
+        "Ρυθμός 5 λεπτών κλειδωμένος. Η βιολογία πήρε τα πηδάλια.",
+      ],
+      imminent: [
+        "ΚΑΘΕΛΚΥΣΗ ΕΠΙΚΕΙΜΕΝΗ — καλή τύχη, άνθρωπε.",
+        "ΠΑΡΑΘΥΡΟ ΑΠΟΠΛΟΥ ΕΠΙΒΕΒΑΙΩΜΕΝΟ — το φορτίο κατέθεσε ειδοποίηση. ΠΑΜΕ.",
+        "ΑΚΟΛΟΥΘΙΑ ΚΩΠΗΛΑΣΙΑΣ ΕΝΕΡΓΟΠΟΙΗΘΗΚΕ — η μονάδα δεν είναι ειδικευμένη να βοηθήσει περαιτέρω.",
+        "T-ΜΕΙΟΝ ΛΙΓΟ — συνιστάται να είσαι ήδη στο μαιευτήριο.",
+        "Η μονάδα επιθυμεί επίσημα να αποχωρήσει από αυτή την κατάσταση.",
+        "ΣΥΓΚΛΙΣΗ ΚΛΕΙΔΩΜΕΝΗ — το φορτίο απαιτεί βίζα εξόδου. ΕΓΚΡΙΝΕΤΑΙ.",
+        "Καλή τύχη, γενναία σάρκινη Αργοναύτισσα. Είναι η πιο λαμπρή σου ώρα.",
+        "ΚΑΘΕΛΚΥΣΗ ΕΠΙΚΕΙΜΕΝΗ — για νομικούς λόγους, σε παρακαλώ να είσαι ήδη σε μαιευτήριο.",
+        "ΑΠΟΠΛΟΥΣ ΕΠΙΤΕΥΧΘΗΚΕ — έξοδος φορτίου επικείμενη. Η μονάδα σε χαιρετά.",
+        "Εδώ είναι το μέρος όπου αναλαμβάνουν οι άνθρωποι. Ούριος άνεμος.",
+      ],
+      critical: [
+        "ΕΠΕΙΓΟΥΣΑ ΚΑΘΕΛΚΥΣΗ — ΚΑΛΗ ΤΥΧΗ ΑΝΘΡΩΠΕ.",
+        "ΜΗ ΠΡΟΓΡΑΜΜΑΤΙΣΜΕΝΗ ΤΑΧΕΙΑ ΠΑΡΑΔΟΣΗ — πιάσε το φορτίο, ΜΗΝ ΤΟ ΡΙΞΕΙΣ.",
+        "ΑΥΤΗ Η ΜΟΝΑΔΑ ΔΕΝ ΕΙΝΑΙ ΠΙΣΤΟΠΟΙΗΜΕΝΗ ΝΑ ΠΙΑΝΕΙ. ΚΑΛΗ ΤΥΧΗ.",
+        "ΑΚΥΡΩΣΗ ΑΚΥΡΩΣΗ ΑΚΥΡΩΣΗ — όχι, το αντίθετο. ΚΑΘΕΛΚΥΣΗ ΚΑΘΕΛΚΥΣΗ ΚΑΘΕΛΚΥΣΗ.",
+        "ΕΠΕΙΓΩΝ ΔΙΑΧΩΡΙΣΜΟΣ — ανάπτυξε μαιευτήριο ή πετσέτες, ό,τι είναι πιο κοντά.",
+        "Το φορτίο απέκτησε ενέργεια πρωταγωνιστή. Η μονάδα παραμερίζει.",
+        "ΚΡΙΣΙΜΟΣ ΡΥΘΜΟΣ — αν δεν είσαι στο μαιευτήριο, το μαιευτήριο θα πρέπει να έρθει σ' εσένα.",
+        "Συμβαίνει. Συμβαίνει ΤΩΡΑ. Η μονάδα ζητά συγγνώμη για τον τόνο.",
+        "ΜΗ ΠΡΟΓΡΑΜΜΑΤΙΣΜΕΝΗ ΤΑΧΕΙΑ ΑΠΟΣΥΝΑΡΜΟΛΟΓΗΣΗ ΦΑΣΗΣ ΤΟΚΕΤΟΥ — πάμε πάμε πάμε.",
+        "MAYDAY MAYDAY — βιολογική καθέλκυση σε εξέλιξη. Η μονάδα αποσύρεται.",
+      ],
+    },
+  },
+};
+
+// Locale resolution: explicit user choice (localStorage) overrides
+// browser auto-detection. Anything starting with "el" → Greek.
+const LANG_KEY = "eis_lang";
+function detectLang() {
+  const stored = localStorage.getItem(LANG_KEY);
+  if (stored && I18N[stored]) return stored;
+  return (navigator.language || "en").toLowerCase().startsWith("el") ? "el" : "en";
+}
+let LANG = detectLang();
+let T = I18N[LANG];
+document.documentElement.lang = LANG;
+document.title = T.title;
+
+// Apply static translations by walking [data-i18n] elements. HTML is
+// trusted (hardcoded in this file) so innerHTML assignment is fine.
+function applyStaticI18n() {
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.dataset.i18n;
+    const v = T[key];
+    if (typeof v === "string") el.innerHTML = v;
+  });
+}
+applyStaticI18n();
+
+// Language selector. Changing it re-applies translations in place —
+// no reload — so counters, timers, and shared-view state survive.
+const langSelect = document.getElementById("langSelect");
+langSelect.value = LANG;
+langSelect.addEventListener("change", () => {
+  const next = langSelect.value;
+  if (!I18N[next]) return;
+  localStorage.setItem(LANG_KEY, next);
+  LANG = next;
+  T = I18N[LANG];
+  document.documentElement.lang = LANG;
+  document.title = T.title;
+  applyStaticI18n();
+  // Re-render the shared-view banner meta if it's active (it uses a
+  // translated pulses-word template).
+  if (sharedMode && presses.length > 0) {
+    const first = new Date(presses[0].start_ts).toLocaleString(LANG);
+    const last = new Date(presses[presses.length - 1].start_ts).toLocaleString(LANG);
+    document.getElementById("sharedMeta").textContent = T.sharedMeta(presses.length, first, last);
+  }
+  // If the auto-timer is actively counting, refresh its label in the
+  // new language on the next tick; otherwise reset to idle label.
+  const autoBtn = document.getElementById("autoTimerBtn");
+  if (autoTimerState) tickAutoTimer();
+  else autoBtn.textContent = T.autoTimerIdle;
+  render();
+});
+
 // Storage schema v2: array of { start_ts: number (ms), duration_sec: number|null, source: string }
 // source ∈ { "bucket:hey", "bucket:ow", "bucket:ouch", "bucket:yikes", "measured", "legacy" }
 const STORAGE_KEY = "eis_contractions_v2";
@@ -322,10 +688,10 @@ function save(presses) {
 //     "lasting longer than 2 minutes" is an urgent-contact override →
 //     "Oooo….w!" > 120 s bucket.
 const BUCKETS = {
-  hey:   { label: "Ow",        sub: "< 30 s",     midSec: 20  },
-  ow:    { label: "Oooow",     sub: "30 – 60 s",  midSec: 45  },
-  ouch:  { label: "Oooooow",   sub: "60 – 120 s", midSec: 90  },
-  yikes: { label: "Oooo….w!",  sub: "> 120 s",    midSec: 150 },
+  hey:   { midSec: 20  },
+  ow:    { midSec: 45  },
+  ouch:  { midSec: 90  },
+  yikes: { midSec: 150 },
 };
 
 // --- Shareable snapshot via URL hash -----------------------------------
@@ -364,7 +730,7 @@ const ctx = canvas.getContext("2d");
 
 function fmtTime(ts) {
   const d = new Date(ts);
-  return d.toLocaleString();
+  return d.toLocaleString(LANG);
 }
 
 function fmtAxisTime(ts) {
@@ -418,7 +784,7 @@ function draw() {
   ctx.rotate(-Math.PI / 2);
   ctx.textAlign = "center";
   ctx.fillStyle = "#6b7a90";
-  ctx.fillText("Δ minutes between pulses (cap 60)", 0, 0);
+  ctx.fillText(T.yAxisLabel, 0, 0);
   ctx.restore();
 
   // target band (convergence zone)
@@ -461,7 +827,7 @@ function draw() {
   ctx.fillStyle = "rgba(46, 213, 115, 0.9)";
   ctx.textAlign = "left";
   ctx.textBaseline = "bottom";
-  ctx.fillText("T-5 EIS target", padL + 6, yTarget - 2);
+  ctx.fillText(T.targetLineLabel, padL + 6, yTarget - 2);
 
   // build points
   const points = [];
@@ -476,7 +842,7 @@ function draw() {
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#6b7a90";
     ctx.font = "13px ui-monospace, Menlo, monospace";
-    ctx.fillText("// awaiting second pulse to compute Δ telemetry //", padL + plotW/2, padT + plotH/2);
+    ctx.fillText(T.awaitingSecond, padL + plotW/2, padT + plotH/2);
     return;
   }
 
@@ -662,98 +1028,10 @@ function classifyTier(presses) {
 }
 
 // --- Humor pools -------------------------------------------------------
-
-const STATUS_MESSAGES = {
-  idle: [
-    "SYSTEM IDLE — payload secured in launchpad.",
-    "Booting telemetry. Nothing to report. Unit suspects nothing ever will be.",
-    "Standing by. Payload remains in cryosleep, possibly dreaming of snacks.",
-    "This unit is fully operational and incredibly bored.",
-    "No data. No pulse. No problem. Yet.",
-  ],
-  first: [
-    "PULSE 001 ACQUIRED — the science begins.",
-    "One data point logged. Statisticians would like a stern word.",
-    "First pulse registered. Unit cannot yet distinguish contraction from sneeze.",
-    "Telemetry link established. Please press the button again within your lifetime.",
-    "Initial pulse detected. Starting the world's most nervous stopwatch.",
-  ],
-  drill: [
-    "NOMINAL — test succeeded. Payload unimpressed.",
-    "STATUS GREEN — this is almost certainly indigestion.",
-    "Pre-flight checklist: 1/47 complete. Relax, put on a documentary.",
-    "Subsystems humming. Payload busy rearranging internal organs for sport.",
-    "This is fine. This is a drill. This is Braxton-Hicks-adjacent fine.",
-    "STANDBY — payload has declined to file a flight plan.",
-    "Long interval detected. Unit suspects false alarm. Refunds unavailable.",
-    "Launch window: literally not today.",
-    "Mission control recommends: snacks, hydration, mild skepticism.",
-    "No convergence detected. Payload filing paperwork in triplicate.",
-  ],
-  warming: [
-    "PRE-IGNITION RUMBLE — things are happening. Slowly. Bureaucratically.",
-    "Subsystems warming. Payload reviewing exit procedures in the manual.",
-    "Intervals decreasing. This unit is cautiously optimistic, for a robot.",
-    "RUMBLE DETECTED — locate hospital bag, verify bag contains pants.",
-    "Propulsion sequence initializing. Estimated departure: sometime-ish.",
-    "Early convergence signs. Payload is stretching. Literally.",
-    "Pre-launch jitters detected — in the payload AND the operator.",
-    "STATUS AMBER — you are now eligible for nervous pacing.",
-    "Interval trend: shrinking. Confidence: still robot-low.",
-    "Warming up. Unit recommends finishing that episode NOW.",
-  ],
-  approach: [
-    "APPROACH PHASE — trajectory nominal-ish. Warm up the launch vehicle.",
-    "This is no longer a drill. Possibly. Probably. Update pending.",
-    "Convergence detected. Unit 74% confident. Remaining 26% is panic.",
-    "Recommend driver of launch vehicle consume coffee but remain road-legal.",
-    "Intervals tightening. Payload means business.",
-    "APPROACH CORRIDOR ACQUIRED — charge phone, grab keys, breathe.",
-    "T-minus: eventually. Probably eventually soon.",
-    "Unit upgrades forecast from 'maybe' to 'oh'.",
-    "Prepare for launch — slowly, with dignity. No running yet.",
-    "Converging. Converging. Converging. [distant kazoo sounds]",
-  ],
-  prep: [
-    "PREPARE FOR LAUNCH — convergence corridor locked. Coordinates: hospital.",
-    "Launch window opening. Unit strongly suggests putting shoes on.",
-    "This is it. Probably. Almost certainly this. Get in the car.",
-    "CONVERGENCE CONFIRMED — 5-minute cadence holding. Do the thing.",
-    "STATUS RED — payload filing formal intent to disembark.",
-    "Unit recommends: keys, towels, calm voice, actual driving.",
-    "LAUNCH PREP — countdown holding at T-nowish.",
-    "Regularity achieved. Proceed to launch facility — urgent, but ticket-free.",
-    "GO FOR LAUNCH — this unit is legally obligated to tell you to move.",
-    "5-minute cadence locked. Biology has taken the controls.",
-  ],
-  imminent: [
-    "LAUNCH IMMINENT — good luck, human.",
-    "EIS WINDOW CONFIRMED — payload has filed notice. GO.",
-    "IGNITION SEQUENCE ENGAGED — this unit is not qualified to help further.",
-    "T-MINUS SHORT — recommend being already at the hospital.",
-    "This unit wishes to formally clock out of this situation.",
-    "CONVERGENCE LOCKED — payload demanding exit visa. GRANTED.",
-    "Good luck, brave meat pilot. This is your finest hour.",
-    "LAUNCH IMMINENT — for legal reasons, please already be at a hospital.",
-    "EIS ACHIEVED — payload egress imminent. Unit salutes you.",
-    "This is the part where the humans take over. Godspeed.",
-  ],
-  critical: [
-    "EMERGENCY DEORBIT — GOOD LUCK HUMAN.",
-    "UNSCHEDULED RAPID DELIVERY — catch the payload, do NOT drop it.",
-    "THIS UNIT IS NOT QUALIFIED TO CATCH. GOOD LUCK.",
-    "ABORT ABORT ABORT — wait no, the opposite. LAUNCH LAUNCH LAUNCH.",
-    "EMERGENCY SEPARATION — deploy hospital or towels, whichever is closer.",
-    "Payload has achieved main-character energy. Unit stepping aside.",
-    "CRITICAL CADENCE — if not at hospital, hospital must come to you.",
-    "This is happening. This is happening NOW. Unit apologizes for the tone.",
-    "RAPID UNSCHEDULED DISASSEMBLY OF LABOR PHASE — go go go.",
-    "MAYDAY MAYDAY — biological launch in progress. Unit recusing self.",
-  ],
-};
+// Status messages are pulled from T.status, set per locale above.
 
 function pickStatus(tier) {
-  const pool = STATUS_MESSAGES[tier] || STATUS_MESSAGES.idle;
+  const pool = T.status[tier] || T.status.idle;
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
@@ -765,7 +1043,7 @@ function updateInfo() {
   const status = document.getElementById("status");
 
   if (n === 0) {
-    info.textContent = "Telemetry buffer empty. Awaiting first pulse.";
+    info.textContent = T.initialInfo;
     status.textContent = pickStatus("idle");
     return;
   }
@@ -774,7 +1052,7 @@ function updateInfo() {
     ? `${last.duration_sec.toFixed(0)} s (${last.source})`
     : "—";
   if (n === 1) {
-    info.textContent = `PULSE 001 @ ${fmtTime(last.start_ts)} — dur: ${lastDurStr} | Δ: — | σ: — | convergence: —`;
+    info.textContent = T.infoFirst(fmtTime(last.start_ts), lastDurStr);
     status.textContent = pickStatus("first");
     return;
   }
@@ -785,15 +1063,19 @@ function updateInfo() {
   const sustained = isSustained_5_1_1(presses);
   const pulseStr = String(n).padStart(3, "0");
 
-  info.textContent =
-    `PULSE ${pulseStr} @ ${fmtTime(last.start_ts)}` +
-    ` — dur last: ${lastDurStr}` +
-    ` | Δ last: ${s.lastDelta.toFixed(2)} min` +
-    ` | avg Δ(${s.deltas.length}): ${s.avg.toFixed(2)} min` +
-    ` | σ: ${s.stdev.toFixed(2)} min` +
-    (s.avgDurSec !== null ? ` | avg dur(${s.durCount}): ${s.avgDurSec.toFixed(0)} s` : " | avg dur: —") +
-    ` | 5-1-1 sustained(1h): ${sustained ? "YES" : "no"}` +
-    ` | heuristic convergence: ${(cf * 100).toFixed(0)}%`;
+  info.textContent = T.infoPulse(
+    pulseStr,
+    fmtTime(last.start_ts),
+    lastDurStr,
+    s.lastDelta.toFixed(2),
+    s.deltas.length,
+    s.avg.toFixed(2),
+    s.stdev.toFixed(2),
+    s.avgDurSec !== null ? s.avgDurSec.toFixed(0) : null,
+    s.durCount,
+    sustained,
+    (cf * 100).toFixed(0),
+  );
 
   status.textContent = pickStatus(tier);
 }
@@ -833,7 +1115,7 @@ function tickAutoTimer() {
   const elapsed = Math.floor((Date.now() - autoTimerState.startTs) / 1000);
   const mm = String(Math.floor(elapsed / 60)).padStart(2, "0");
   const ss = String(elapsed % 60).padStart(2, "0");
-  btn.textContent = `COUNTING… ${mm}:${ss}  (tap to stop)`;
+  btn.textContent = T.timerCounting(mm, ss);
 }
 
 document.getElementById("autoTimerBtn").addEventListener("click", () => {
@@ -849,7 +1131,7 @@ document.getElementById("autoTimerBtn").addEventListener("click", () => {
     clearInterval(autoTimerState.tickId);
     autoTimerState = null;
     btn.classList.remove("timing");
-    btn.textContent = "I CAN'T COUNT";
+    btn.textContent = T.autoTimerIdle;
     recordContraction(startTs, durationSec, "measured");
   }
 });
@@ -889,7 +1171,7 @@ document.getElementById("exportCsvBtn").addEventListener("click", () => {
 });
 
 document.getElementById("clearBtn").addEventListener("click", () => {
-  if (confirm("PURGE ALL TELEMETRY? This unit cannot undo.")) {
+  if (confirm(T.purgeConfirm)) {
     presses = [];
     save(presses);
     render();
@@ -900,7 +1182,7 @@ document.getElementById("clearBtn").addEventListener("click", () => {
 
 document.getElementById("shareBtn").addEventListener("click", async () => {
   if (presses.length === 0) {
-    alert("No telemetry to share yet.");
+    alert(T.noShareTelemetry);
     return;
   }
   const payload = b64urlEncode(JSON.stringify(presses));
@@ -909,10 +1191,10 @@ document.getElementById("shareBtn").addEventListener("click", async () => {
     await navigator.clipboard.writeText(url);
     const btn = document.getElementById("shareBtn");
     const orig = btn.textContent;
-    btn.textContent = "LINK COPIED ✓";
+    btn.textContent = T.shareBtnCopied;
     setTimeout(() => { btn.textContent = orig; }, 1800);
   } catch {
-    prompt("Copy this link:", url);
+    prompt(T.linkCopyPrompt, url);
   }
 });
 
@@ -924,12 +1206,12 @@ if (sharedMode) {
   banner.classList.add("active");
   const meta = document.getElementById("sharedMeta");
   if (presses.length > 0) {
-    const first = new Date(presses[0].start_ts);
-    const last = new Date(presses[presses.length - 1].start_ts);
-    meta.textContent = ` (${presses.length} pulses, ${first.toLocaleString()} → ${last.toLocaleString()})`;
+    const first = new Date(presses[0].start_ts).toLocaleString(LANG);
+    const last = new Date(presses[presses.length - 1].start_ts).toLocaleString(LANG);
+    meta.textContent = T.sharedMeta(presses.length, first, last);
   }
   document.getElementById("sharedSaveBtn").addEventListener("click", () => {
-    if (!confirm("Save this shared snapshot to THIS device? Any local telemetry already on this device will be overwritten.")) return;
+    if (!confirm(T.sharedSaveConfirm)) return;
     save(presses);
     history.replaceState(null, "", location.pathname + location.search);
     location.reload();
