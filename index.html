@@ -16,6 +16,13 @@
   #info { font-size: 13px; color: #8aa0bf; text-align: center; min-height: 1.4em; max-width: 720px; }
   #status { font-size: 14px; color: #ffd166; text-align: center; min-height: 1.4em; max-width: 720px; font-weight: 600; }
   canvas { background: #0f1624; border: 1px solid #223149; border-radius: 6px; max-width: 100%; }
+  footer { max-width: 820px; margin-top: 24px; font-size: 12px; color: #6b7a90; line-height: 1.55; }
+  footer h2 { font-size: 13px; color: #a9d2ff; letter-spacing: 1px; margin: 16px 0 6px; }
+  footer .disclaimer { border: 1px solid #6b3a2b; background: #1f1410; color: #ffb199; padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; }
+  footer ol { padding-left: 20px; margin: 6px 0; }
+  footer li { margin-bottom: 4px; }
+  footer a { color: #a9d2ff; word-break: break-all; }
+  footer .limits { font-style: italic; color: #8aa0bf; }
 </style>
 </head>
 <body>
@@ -30,6 +37,104 @@
     <button id="exportCsvBtn">DOWNLOAD TELEMETRY (.csv)</button>
     <button id="clearBtn">PURGE LOG</button>
   </div>
+
+  <footer>
+    <div class="disclaimer">
+      ⚠ <strong>NOT A MEDICAL DEVICE.</strong> This app is a toy companion
+      for timing intervals between contractions. It does not diagnose labor,
+      does not replace clinical judgement, and cannot substitute for contact
+      with a qualified healthcare provider. If in doubt, call your midwife,
+      OB, or maternity unit.
+    </div>
+
+    <h2>// THRESHOLDS AND SOURCES //</h2>
+    <ol>
+      <li>
+        <strong>5-1-1 rule (tier "prep"):</strong> contractions ~5 minutes
+        apart, each ~1 minute long, sustained for ~1 hour before going to
+        the hospital. The app verifies the 5-minute interval and the
+        1-hour sustained span; it cannot measure the 1-minute duration of
+        each contraction — the operator must confirm that separately.
+        Source: Cleveland Clinic, "Stages of Labor" (reviewed 2025-04-23):
+        <a href="https://my.clevelandclinic.org/health/body/22640-stages-of-labor" target="_blank" rel="noopener">clevelandclinic.org/…/stages-of-labor</a>.
+      </li>
+      <li>
+        <strong>Active labor contractions (tier "imminent"):</strong>
+        "every two to five minutes, lasting about 60 to 90 seconds." The
+        app uses <em>avg &lt; 3 min</em> as a proxy for deep active labor.
+        Source: Mayo Clinic, "Stages of labor and birth":
+        <a href="https://www.mayoclinic.org/healthy-lifestyle/labor-and-delivery/in-depth/stages-of-labor/art-20046545" target="_blank" rel="noopener">mayoclinic.org/…/stages-of-labor</a>.
+      </li>
+      <li>
+        <strong>Early labor / latent phase (tier "drill"):</strong>
+        contractions "20 to 30 seconds" long, "every 30 to 60 minutes";
+        NHS describes latent-phase intervals as highly variable — "a few
+        minutes ... or half an hour or even longer." Sources:
+        Cleveland Clinic, "Contractions" (updated 2024-08-08):
+        <a href="https://my.clevelandclinic.org/health/symptoms/contractions" target="_blank" rel="noopener">clevelandclinic.org/…/contractions</a>;
+        NHS, "Signs that labour has begun" (reviewed 2023-11-09):
+        <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>.
+      </li>
+      <li>
+        <strong>Tachysystole / urgent override (tier "critical"):</strong>
+        NHS lists as urgent "6 or more contractions every 10 minutes" →
+        mean interval &lt; 1.67 min, and any contraction lasting longer
+        than 2 minutes (duration-based; not measurable by this app).
+        Source: NHS, "Signs that labour has begun" (reviewed 2023-11-09):
+        <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>.
+      </li>
+      <li>
+        <strong>Active labor cervical threshold (context only; not used
+        in classification):</strong> ACOG/SMFM place the active phase at
+        6 cm dilation (Obstetric Care Consensus No. 1, 2014); WHO places
+        it at 5 cm (Labour Care Guide, 2020); NICE uses 4 cm
+        (NG235, 2023-09-29). The app cannot measure dilation and does
+        not use this threshold — listed here to explain why tier names
+        do not rely on it. Sources: ACOG OCC #1 (2014, via AJOG):
+        <a href="https://www.ajog.org/article/S0002-9378(14)00055-6/fulltext" target="_blank" rel="noopener">ajog.org</a>;
+        WHO Labour Care Guide (2020):
+        <a href="https://iris.who.int/bitstream/handle/10665/337693/9789240017566-eng.pdf" target="_blank" rel="noopener">iris.who.int</a>;
+        NICE NG235:
+        <a href="https://www.nice.org.uk/guidance/ng235/chapter/Recommendations" target="_blank" rel="noopener">nice.org.uk/guidance/ng235</a>.
+      </li>
+      <li>
+        <strong>True vs. false labor (qualitative):</strong> ACOG: "True
+        labor contractions have a pattern, get closer together as time
+        goes on, and each lasts about 60 or 90 seconds ... continue even
+        when you rest or move around." No guideline publishes a numeric
+        variance / σ threshold. The app's σ display is a visual aid only
+        and is NOT used in classification. Source: ACOG FAQ, "How to Tell
+        When Labor Begins":
+        <a href="https://www.acog.org/womens-health/faqs/how-to-tell-when-labor-begins" target="_blank" rel="noopener">acog.org/…/how-to-tell-when-labor-begins</a>.
+      </li>
+    </ol>
+
+    <h2>// GO TO HOSPITAL REGARDLESS OF THIS APP IF //</h2>
+    <p>
+      Water breaks (especially if smelly or coloured), vaginal bleeding,
+      reduced fetal movement, constant severe pain with no relief between
+      contractions, under 37 weeks with suspected labour, contractions
+      lasting longer than 2 minutes, 6+ contractions in 10 minutes, or a
+      strong urge to push. Sources: NHS, "Signs that labour has begun"
+      (2023-11-09); ACOG FAQ, "How to Tell When Labor Begins."
+    </p>
+
+    <h2>// APP LIMITATIONS //</h2>
+    <p class="limits">
+      (1) The app measures only the <em>interval</em> between button
+      presses — not the duration of each contraction, so the "1-minute
+      long" part of the 5-1-1 rule is not verified. (2) The rolling
+      statistics window is the last 5 intervals; the 1-hour "sustained"
+      check uses all presses in the last ~65 minutes. (3) No guideline
+      publishes a numeric regularity/σ threshold, so σ and the
+      "heuristic convergence" percent are display-only and do not drive
+      classification. (4) ACOG/WHO/NICE disagree on the cervical
+      dilation marker for active labor (6 cm / 5 cm / 4 cm) — the app
+      cannot measure dilation and does not depend on this. (5) The app
+      does not know about water breaking, bleeding, or other override
+      signals listed above; the operator must act on those independently.
+    </p>
+  </footer>
 
 <script>
 const STORAGE_KEY = "now_presses_v1";
@@ -216,43 +321,235 @@ function draw() {
   }
 }
 
-function robotStatus(lastDeltaMin, n) {
-  if (n === 0) return "SYSTEM IDLE — payload secured in launchpad.";
-  if (n === 1) return "PULSE 001 ACQUIRED — telemetry link established. Awaiting second datum.";
-  if (lastDeltaMin > 30) return "STATUS: NOMINAL STANDBY — payload has no intention of leaving the garage.";
-  if (lastDeltaMin > 20) return "STATUS: GREEN — subsystems humming politely. No launch signature detected.";
-  if (lastDeltaMin > 15) return "PRE-IGNITION RUMBLE DETECTED — recommend locating hospital bag coordinates.";
-  if (lastDeltaMin > 10) return "T-MINUS UNCLEAR — propulsion sequence initializing. Caffeine non-essential personnel.";
-  if (lastDeltaMin > 7)  return "APPROACH PHASE — convergence trajectory looking plausible. Warm up the launch vehicle.";
-  if (lastDeltaMin >= 4 && lastDeltaMin <= 6) return "⚠ EIS WINDOW REACHED — 5-MINUTE CADENCE CONFIRMED. PROCEED TO LAUNCH FACILITY. THIS IS NOT A DRILL.";
-  if (lastDeltaMin >= 2) return "⚠⚠ SUB-NOMINAL SEPARATION — payload egress imminent. Depart facility NOW.";
-  return "⚠⚠⚠ EMERGENCY DEORBIT — this unit is not qualified to catch. GOOD LUCK HUMAN.";
+// --- Telemetry stats ---------------------------------------------------
+//
+// All clinical thresholds below are drawn from published guidelines; see
+// the "REFERENCES" footer on the page and README.md for sources. σ (stdev)
+// is computed as a visual aid only — no authoritative guideline publishes
+// a numeric regularity threshold, so σ is NOT used in tier classification.
+
+function computeStats(presses) {
+  if (presses.length < 2) return null;
+  const deltas = [];
+  const start = Math.max(1, presses.length - 5);
+  for (let i = start; i < presses.length; i++) {
+    deltas.push((presses[i] - presses[i-1]) / 60000);
+  }
+  const avg = deltas.reduce((a,b)=>a+b,0) / deltas.length;
+  const variance = deltas.length > 1
+    ? deltas.reduce((a,b)=>a+(b-avg)**2,0) / deltas.length
+    : 0;
+  const stdev = Math.sqrt(variance);
+  return { deltas, avg, stdev, lastDelta: deltas[deltas.length-1] };
 }
+
+// Heuristic display-only score in [0,1]. Not clinical. Combines proximity
+// to 5 min with σ-based regularity — both are rough and have no cited
+// numeric guideline threshold.
+function convergenceFactor(stats) {
+  if (!stats) return 0;
+  const proximity = 1 - Math.min(1, Math.abs(stats.avg - 5) / 15);
+  const regularity = 1 - Math.min(1, stats.stdev / 5);
+  return proximity * regularity;
+}
+
+// 5-1-1 rule requires the "every 5 minutes" cadence to be SUSTAINED for
+// about 1 hour before calling the provider / going to the hospital.
+// [Cleveland Clinic, "Stages of Labor", reviewed 2025-04-23:
+//  https://my.clevelandclinic.org/health/body/22640-stages-of-labor]
+// [Mayo Clinic, "Stages of labor and birth":
+//  https://www.mayoclinic.org/healthy-lifestyle/labor-and-delivery/in-depth/stages-of-labor/art-20046545]
+function isSustained_5_1_1(presses) {
+  const n = presses.length;
+  if (n < 3) return false;
+  const now = presses[n - 1];
+  // Pick the earliest press within the last 65 minutes (small buffer).
+  let firstIdx = n - 1;
+  for (let i = 0; i < n; i++) {
+    if (now - presses[i] <= 65 * 60 * 1000) { firstIdx = i; break; }
+  }
+  const recent = presses.slice(firstIdx);
+  if (recent.length < 3) return false;
+  const spanMin = (recent[recent.length - 1] - recent[0]) / 60000;
+  if (spanMin < 55) return false; // require ≳1 hour of coverage
+  const deltas = [];
+  for (let i = 1; i < recent.length; i++) {
+    deltas.push((recent[i] - recent[i - 1]) / 60000);
+  }
+  const avg = deltas.reduce((a, b) => a + b, 0) / deltas.length;
+  return avg <= 5;
+}
+
+// Tier classifier. Every numeric threshold cites a source.
+function classifyTier(presses) {
+  const n = presses.length;
+  if (n === 0) return "idle";
+  if (n === 1) return "first";
+
+  const s = computeStats(presses);
+  const { avg, lastDelta } = s;
+
+  // [NHS, "Signs that labour has begun", reviewed 2023-11-09:
+  //  https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/]
+  // Urgent contact if "6 or more contractions every 10 minutes" →
+  // mean interval < 10/6 ≈ 1.67 min. (NHS also lists contractions >2 min
+  // duration as urgent, but this app measures interval only.)
+  if (lastDelta < 1.67 || avg < 1.67) return "critical";
+
+  // [Mayo Clinic, "Stages of labor and birth"]: active labor contractions
+  // "every two to five minutes, lasting about 60 to 90 seconds."
+  // We use avg < 3 min as a proxy for deep active labor / near-transition.
+  if (avg < 3) return "imminent";
+
+  // [Cleveland Clinic, "Stages of Labor", 2025-04-23] — the 5-1-1 rule:
+  // "every five minutes, lasting a minute, for about an hour."
+  // The app cannot verify the "1 minute duration" part — operator must
+  // confirm that separately.
+  if (avg <= 5 && isSustained_5_1_1(presses)) return "prep";
+  if (avg <= 5) return "approach";
+
+  // Pre-active / late latent corridor. [Mayo Clinic, above] places active
+  // labor at 2–5 min; anything 5–10 min is approaching but not yet active.
+  if (avg <= 10) return "warming";
+
+  // [Cleveland Clinic, "Contractions", updated 2024-08-08:
+  //  https://my.clevelandclinic.org/health/symptoms/contractions]
+  // Early labor: "20 to 30 seconds" long, "every 30 to 60 minutes",
+  // progressively shortening. NHS (2023) describes latent phase intervals
+  // as "a few minutes ... or half an hour or even longer" — highly variable.
+  return "drill";
+}
+
+// --- Humor pools -------------------------------------------------------
+
+const STATUS_MESSAGES = {
+  idle: [
+    "SYSTEM IDLE — payload secured in launchpad.",
+    "Booting telemetry. Nothing to report. Unit suspects nothing ever will be.",
+    "Standing by. Payload remains in cryosleep, possibly dreaming of snacks.",
+    "This unit is fully operational and incredibly bored.",
+    "No data. No pulse. No problem. Yet.",
+  ],
+  first: [
+    "PULSE 001 ACQUIRED — the science begins.",
+    "One data point logged. Statisticians would like a stern word.",
+    "First pulse registered. Unit cannot yet distinguish contraction from sneeze.",
+    "Telemetry link established. Please press the button again within your lifetime.",
+    "Initial pulse detected. Starting the world's most nervous stopwatch.",
+  ],
+  drill: [
+    "NOMINAL — test succeeded. Payload unimpressed.",
+    "STATUS GREEN — this is almost certainly indigestion.",
+    "Pre-flight checklist: 1/47 complete. Relax, put on a documentary.",
+    "Subsystems humming. Payload busy rearranging internal organs for sport.",
+    "This is fine. This is a drill. This is Braxton-Hicks-adjacent fine.",
+    "STANDBY — payload has declined to file a flight plan.",
+    "Long interval detected. Unit suspects false alarm. Refunds unavailable.",
+    "Launch window: literally not today.",
+    "Mission control recommends: snacks, hydration, mild skepticism.",
+    "No convergence detected. Payload filing paperwork in triplicate.",
+  ],
+  warming: [
+    "PRE-IGNITION RUMBLE — things are happening. Slowly. Bureaucratically.",
+    "Subsystems warming. Payload reviewing exit procedures in the manual.",
+    "Intervals decreasing. This unit is cautiously optimistic, for a robot.",
+    "RUMBLE DETECTED — locate hospital bag, verify bag contains pants.",
+    "Propulsion sequence initializing. Estimated departure: sometime-ish.",
+    "Early convergence signs. Payload is stretching. Literally.",
+    "Pre-launch jitters detected — in the payload AND the operator.",
+    "STATUS AMBER — you are now eligible for nervous pacing.",
+    "Interval trend: shrinking. Confidence: still robot-low.",
+    "Warming up. Unit recommends finishing that episode NOW.",
+  ],
+  approach: [
+    "APPROACH PHASE — trajectory nominal-ish. Warm up the launch vehicle.",
+    "This is no longer a drill. Possibly. Probably. Update pending.",
+    "Convergence detected. Unit 74% confident. Remaining 26% is panic.",
+    "Recommend driver of launch vehicle consume coffee but remain road-legal.",
+    "Intervals tightening. Payload means business.",
+    "APPROACH CORRIDOR ACQUIRED — charge phone, grab keys, breathe.",
+    "T-minus: eventually. Probably eventually soon.",
+    "Unit upgrades forecast from 'maybe' to 'oh'.",
+    "Prepare for launch — slowly, with dignity. No running yet.",
+    "Converging. Converging. Converging. [distant kazoo sounds]",
+  ],
+  prep: [
+    "PREPARE FOR LAUNCH — convergence corridor locked. Coordinates: hospital.",
+    "Launch window opening. Unit strongly suggests putting shoes on.",
+    "This is it. Probably. Almost certainly this. Get in the car.",
+    "CONVERGENCE CONFIRMED — 5-minute cadence holding. Do the thing.",
+    "STATUS RED — payload filing formal intent to disembark.",
+    "Unit recommends: keys, towels, calm voice, actual driving.",
+    "LAUNCH PREP — countdown holding at T-nowish.",
+    "Regularity achieved. Proceed to launch facility — urgent, but ticket-free.",
+    "GO FOR LAUNCH — this unit is legally obligated to tell you to move.",
+    "5-minute cadence locked. Biology has taken the controls.",
+  ],
+  imminent: [
+    "LAUNCH IMMINENT — good luck, human.",
+    "EIS WINDOW CONFIRMED — payload has filed notice. GO.",
+    "IGNITION SEQUENCE ENGAGED — this unit is not qualified to help further.",
+    "T-MINUS SHORT — recommend being already at the hospital.",
+    "This unit wishes to formally clock out of this situation.",
+    "CONVERGENCE LOCKED — payload demanding exit visa. GRANTED.",
+    "Good luck, brave meat pilot. This is your finest hour.",
+    "LAUNCH IMMINENT — for legal reasons, please already be at a hospital.",
+    "EIS ACHIEVED — payload egress imminent. Unit salutes you.",
+    "This is the part where the humans take over. Godspeed.",
+  ],
+  critical: [
+    "EMERGENCY DEORBIT — GOOD LUCK HUMAN.",
+    "UNSCHEDULED RAPID DELIVERY — catch the payload, do NOT drop it.",
+    "THIS UNIT IS NOT QUALIFIED TO CATCH. GOOD LUCK.",
+    "ABORT ABORT ABORT — wait no, the opposite. LAUNCH LAUNCH LAUNCH.",
+    "EMERGENCY SEPARATION — deploy hospital or towels, whichever is closer.",
+    "Payload has achieved main-character energy. Unit stepping aside.",
+    "CRITICAL CADENCE — if not at hospital, hospital must come to you.",
+    "This is happening. This is happening NOW. Unit apologizes for the tone.",
+    "RAPID UNSCHEDULED DISASSEMBLY OF LABOR PHASE — go go go.",
+    "MAYDAY MAYDAY — biological launch in progress. Unit recusing self.",
+  ],
+};
+
+function pickStatus(tier) {
+  const pool = STATUS_MESSAGES[tier] || STATUS_MESSAGES.idle;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// --- Rendering ---------------------------------------------------------
 
 function updateInfo() {
   const n = presses.length;
   const info = document.getElementById("info");
   const status = document.getElementById("status");
+
   if (n === 0) {
     info.textContent = "Telemetry buffer empty. Awaiting first pulse.";
-    status.textContent = robotStatus(null, 0);
+    status.textContent = pickStatus("idle");
     return;
   }
   const last = presses[n-1];
   if (n === 1) {
-    info.textContent = `PULSE 001 @ ${fmtTime(last)} — Δ: —`;
-    status.textContent = robotStatus(null, 1);
+    info.textContent = `PULSE 001 @ ${fmtTime(last)} — Δ: — | σ: — | convergence: —`;
+    status.textContent = pickStatus("first");
     return;
   }
-  const deltaMin = (last - presses[n-2]) / 60000;
-  // rolling average over last 5 intervals
-  const recent = [];
-  for (let i = Math.max(1, presses.length - 5); i < presses.length; i++) {
-    recent.push((presses[i] - presses[i-1]) / 60000);
-  }
-  const avg = recent.reduce((a,b)=>a+b,0) / recent.length;
-  info.textContent = `PULSE ${String(n).padStart(3,"0")} @ ${fmtTime(last)} — Δ last: ${deltaMin.toFixed(2)} min — Δ avg(${recent.length}): ${avg.toFixed(2)} min`;
-  status.textContent = robotStatus(deltaMin, n);
+
+  const s = computeStats(presses);
+  const cf = convergenceFactor(s);
+  const tier = classifyTier(presses);
+  const sustained = isSustained_5_1_1(presses);
+  const pulseStr = String(n).padStart(3, "0");
+
+  info.textContent =
+    `PULSE ${pulseStr} @ ${fmtTime(last)}` +
+    ` — Δ last: ${s.lastDelta.toFixed(2)} min` +
+    ` | avg(${s.deltas.length}): ${s.avg.toFixed(2)} min` +
+    ` | σ: ${s.stdev.toFixed(2)} min` +
+    ` | 5-1-1 sustained(1h): ${sustained ? "YES" : "no"}` +
+    ` | heuristic convergence: ${(cf * 100).toFixed(0)}%`;
+
+  status.textContent = pickStatus(tier);
 }
 
 function render() {
