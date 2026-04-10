@@ -32,12 +32,13 @@ record schema, so you can mix them freely.
    `bucket:*` source so you can tell measured vs. estimated apart
    later.
 
-2. **`BEGIN SCREAM` / `END SCREAM` (secondary).** Tap once when the
-   contraction starts, tap again when it ends — the app measures the
-   exact duration in seconds and records the true start time. More
-   precise, but requires the app to be open at the start of the
-   contraction, so it's most useful later in labor when you're already
-   timing deliberately.
+2. **`I CAN'T COUNT` auto-timer (secondary).** Tap once when the
+   contraction starts; the button flips to `COUNTING… MM:SS` with a
+   live counter. Tap again when it ends — the app records the exact
+   start time and the measured duration in seconds. More precise, but
+   requires the app to be open at the start of the contraction, so
+   it's most useful later in labor when you're already timing
+   deliberately.
 
 ## Features
 
@@ -67,7 +68,7 @@ record schema, so you can mix them freely.
 
 1. Open https://rmaiko.github.io/timer/ on your phone or laptop.
 2. Tap a bucket button each time a contraction *finishes*, picking the
-   range it felt like. (Or use `BEGIN SCREAM` / `END SCREAM` for an
+   range it felt like. (Or use `I CAN'T COUNT` for an
    exact measurement if the app is already open.)
 3. Watch the points funnel toward the 5-minute line.
 4. When the status line starts yelling in all caps, act accordingly.
@@ -103,7 +104,7 @@ timestamps) is auto-migrated on first load and tagged with source
 
 Every numeric threshold the app uses comes from a published guideline.
 Duration-dependent checks are enforced whenever duration data is
-available (from the SCREAM button or a bucket tap); otherwise the
+available (from the `I CAN'T COUNT` auto-timer or a bucket tap); otherwise the
 duration half of each rule is noted as "operator verified."
 
 | Tier | Triggered when | Source |
@@ -167,8 +168,8 @@ of the following happen, whatever the app is showing:
 
 ## App limitations
 
-1. Duration data is either **measured** (via `BEGIN SCREAM` / `END
-   SCREAM`) or **bucketed** (via a tap on one of the 4 Ow buttons, in
+1. Duration data is either **measured** (via the `I CAN'T COUNT`
+   auto-timer) or **bucketed** (via a tap on one of the 4 Ow buttons, in
    which case the stored `duration_sec` is the midpoint of the selected
    range — 20 / 45 / 90 / 150 s). When duration data is missing, the
    "~1 minute long" half of 5-1-1 falls back to operator confirmation.
@@ -182,9 +183,9 @@ of the following happen, whatever the app is showing:
    does not use this threshold.
 5. The app does not know about override signals (see list above) — act
    on those independently.
-6. `BEGIN SCREAM` requires the app to stay open between start and end
-   taps — if you leave the page mid-contraction the timer is lost.
-   Use a bucket tap after the fact in that case.
+6. `I CAN'T COUNT` requires the app to stay open between the start
+   and end taps — if you close the tab or reload mid-contraction the
+   timer is lost. Use a bucket tap after the fact in that case.
 
 ## Disclaimer
 
