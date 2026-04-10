@@ -2,17 +2,45 @@
 
 > Payload launch monitor for human delivery systems.
 
-A single-page web app for timing labor contractions. Press the big red
-`CONTRACTION` button each time one starts. Starting from the second press,
-the graph plots the interval (Δ, in minutes) between consecutive presses
-against wall-clock time. When the intervals converge to roughly 5 minutes —
-the "EIS window" — it's time to head to the launch facility.
+A single-page web app for timing labor contractions. Every time a
+contraction starts, tap a button; the graph plots the interval
+(Δ, in minutes) between consecutive presses and when intervals converge
+to roughly 5 minutes — the "EIS window" — it's time to head to the
+launch facility.
 
 Live at: https://rmaiko.github.io/timer/
 
+## Input modes
+
+The app supports two ways to log a contraction. Both write to the same
+record schema, so you can mix them freely.
+
+1. **Duration buckets (primary).** Four colored buttons that bucket the
+   contraction by how long it lasted. Fastest to tap, no preparation
+   needed, good for early labor when the phone might not even be
+   in hand:
+
+   | Label | Range | Meaning (cited) |
+   |---|---|---|
+   | `Ow` | < 30 s | Early/latent range — Cleveland Clinic "20 to 30 seconds" [4] |
+   | `Oooow` | 30 – 60 s | Intermediate, not yet active |
+   | `Oooooow` | 60 – 120 s | Active labor range — Mayo "60 to 90 seconds" [2] |
+   | `Oooo….w!` | > 120 s | NHS urgent override [1] — contractions lasting longer than 2 minutes |
+
+   Each bucket stores the **midpoint** of its range as an estimated
+   `duration_sec` (20 / 45 / 90 / 150 s) and tags the record with a
+   `bucket:*` source so you can tell measured vs. estimated apart
+   later.
+
+2. **`BEGIN SCREAM` / `END SCREAM` (secondary).** Tap once when the
+   contraction starts, tap again when it ends — the app measures the
+   exact duration in seconds and records the true start time. More
+   precise, but requires the app to be open at the start of the
+   contraction, so it's most useful later in labor when you're already
+   timing deliberately.
+
 ## Features
 
-- **One button.** Hit it every time a contraction starts.
 - **Convergence graph.** Y-axis is Δ minutes (capped at 60), X-axis is
   wall-clock time. A dashed green line marks the 5-minute EIS target, a
   shaded band marks the 4–6 min window, and a funnel shows where the
@@ -21,18 +49,26 @@ Live at: https://rmaiko.github.io/timer/
   blue when far.
 - **Robot-humor status line.** Scales from "payload has no intention of
   leaving the garage" through "PROCEED TO LAUNCH FACILITY" to
-  "GOOD LUCK HUMAN" depending on the last interval.
-- **Rolling telemetry.** Shows the latest Δ and a rolling average of the
-  last five intervals.
-- **Local storage.** All data stays in your browser. No servers, no
-  accounts, no tracking.
-- **Export.** Download the full log as JSON or CSV at any time.
+  "GOOD LUCK HUMAN" depending on the recent pattern.
+- **Telemetry line.** Last Δ, rolling average of the last 5 intervals,
+  σ, last duration + source, rolling avg duration, whether the 5-1-1
+  cadence has been sustained for ~1 hour, and a heuristic convergence
+  %.
+- **Local storage.** All data stays in your browser under the key
+  `eis_contractions_v2`. Old `now_presses_v1` data is auto-migrated on
+  first load and tagged with source `legacy`. No servers, no accounts,
+  no tracking.
+- **Export.** Download the full log as JSON or CSV at any time — each
+  record includes timestamp, ISO time, Δ minutes, duration_sec, and
+  source.
 - **Purge.** Wipe the log when you're done (or testing).
 
 ## Usage
 
 1. Open https://rmaiko.github.io/timer/ on your phone or laptop.
-2. Press `CONTRACTION` at the start of each contraction.
+2. Tap a bucket button each time a contraction *finishes*, picking the
+   range it felt like. (Or use `BEGIN SCREAM` / `END SCREAM` for an
+   exact measurement if the app is already open.)
 3. Watch the points funnel toward the 5-minute line.
 4. When the status line starts yelling in all caps, act accordingly.
 5. Download the telemetry afterwards if you want to keep a record.
@@ -51,8 +87,12 @@ python3 -m http.server
 
 ## A note on data
 
-Everything is stored in `localStorage` under the key `now_presses_v1`.
-That means:
+Everything is stored in `localStorage` under the key
+`eis_contractions_v2`. Each record is `{ start_ts, duration_sec, source }`
+where `source` is one of `bucket:hey | bucket:ow | bucket:ouch |
+bucket:yikes | measured | legacy`. Old `now_presses_v1` data (bare
+timestamps) is auto-migrated on first load and tagged with source
+`legacy`.
 
 - Data persists across reloads on the same browser.
 - Data is **not** synced across devices. Pick one device and stick with it.
@@ -62,9 +102,9 @@ That means:
 ## How the tiers are classified
 
 Every numeric threshold the app uses comes from a published guideline.
-The app cannot measure contraction *duration* (it only sees button
-presses), so any part of a rule that depends on duration is noted as
-"operator verified."
+Duration-dependent checks are enforced whenever duration data is
+available (from the SCREAM button or a bucket tap); otherwise the
+duration half of each rule is noted as "operator verified."
 
 | Tier | Triggered when | Source |
 |---|---|---|
@@ -73,9 +113,9 @@ presses), so any part of a rule that depends on duration is noted as
 | `drill` | avg of last 5 intervals > 10 min | Cleveland Clinic [3], NHS [1] |
 | `warming` | 5 min < avg ≤ 10 min | Mayo Clinic [2] |
 | `approach` | avg ≤ 5 min, but the cadence has NOT been sustained ~1 hr | Cleveland Clinic [3], Mayo Clinic [2] |
-| `prep` | avg ≤ 5 min AND sustained over ~1 hour (≥55 min span) | Cleveland Clinic [3] (5-1-1 rule) |
+| `prep` | avg ≤ 5 min AND sustained ≥1 hr AND (avg duration ≥ 55 s when data exists) | Cleveland Clinic [3] (5-1-1 rule) + Mayo Clinic [2] duration |
 | `imminent` | avg < 3 min (proxy for deep active labor, Mayo's 2–5 min active-labor range) | Mayo Clinic [2] |
-| `critical` | last interval < 1.67 min OR avg < 1.67 min (equivalent to NHS "6+ contractions in 10 min") | NHS [1] |
+| `critical` | last interval < 1.67 min OR avg < 1.67 min OR last duration > 120 s | NHS [1] — "6+ contractions in 10 min" OR "contractions lasting longer than 2 minutes" |
 
 `σ` (the standard deviation of the last 5 intervals) and the
 "heuristic convergence" percentage shown on the page are display-only.
@@ -127,9 +167,11 @@ of the following happen, whatever the app is showing:
 
 ## App limitations
 
-1. The app measures only the **interval** between button presses, not
-   the **duration** of each contraction. The "1-minute long" part of
-   5-1-1 must be confirmed by the operator.
+1. Duration data is either **measured** (via `BEGIN SCREAM` / `END
+   SCREAM`) or **bucketed** (via a tap on one of the 4 Ow buttons, in
+   which case the stored `duration_sec` is the midpoint of the selected
+   range — 20 / 45 / 90 / 150 s). When duration data is missing, the
+   "~1 minute long" half of 5-1-1 falls back to operator confirmation.
 2. The rolling statistics window is the last 5 intervals. The "sustained
    ~1 hour" check uses all presses in the last ~65 minutes.
 3. No guideline publishes a numeric regularity/σ threshold — so σ and
@@ -140,6 +182,9 @@ of the following happen, whatever the app is showing:
    does not use this threshold.
 5. The app does not know about override signals (see list above) — act
    on those independently.
+6. `BEGIN SCREAM` requires the app to stay open between start and end
+   taps — if you leave the page mid-contraction the timer is lost.
+   Use a bucket tap after the fact in that case.
 
 ## Disclaimer
 
