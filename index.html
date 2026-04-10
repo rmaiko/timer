@@ -77,6 +77,7 @@
   <select id="langSelect" aria-label="Language">
     <option value="en">EN</option>
     <option value="el">EL</option>
+    <option value="pt">PT-BR</option>
   </select>
   <h1 data-i18n="title">EIS COUNTDOWN</h1>
   <p class="subtitle" data-i18n="subtitle">// payload launch monitor · convergence target: T-5min //</p>
@@ -286,9 +287,9 @@
 
 <script>
 // --- i18n --------------------------------------------------------------
-// Detect browser locale. Anything starting with "el" (Greek) → Greek;
-// otherwise fall back to English. The Greek pool re-themes the humor
-// from a rocket launch to launching the Argo — the Argonauts' ship.
+// Detect browser locale. "el*" → Greek (Argo / oars re-theme); "pt*" →
+// Brazilian Portuguese (paulistano traffic re-theme: getting to the
+// maternidade through SP trânsito, with paulistano slang in the status pool).
 const I18N = {
   en: {
     title: "EIS COUNTDOWN",
@@ -590,15 +591,172 @@ const I18N = {
       ],
     },
   },
+
+  pt: {
+    title: "EIS — CONTAGEM REGRESSIVA",
+    subtitle: "// monitor de saída para a maternidade · alvo de cadência: T-5min //",
+    sharedBannerLabel: "// VISÃO COMPARTILHADA //",
+    sharedBannerText: " — instantâneo só para leitura",
+    sharedBannerSuffix: ". Os controles de entrada estão desativados.",
+    sharedSaveBtn: "SALVAR NESTE APARELHO (substitui o local)",
+    sharedExitBtn: "SAIR DA VISÃO COMPARTILHADA",
+    howtoSummary: "// COMO USAR ESSE APP //",
+    howtoLi1: `<strong>Depois de cada contração</strong>, toca em um dos quatro botões coloridos abaixo de acordo com <em>quanto tempo</em> a contração durou: <code>Ai</code> (menos de 30 segundos), <code>Aaai</code> (30–60 s), <code>Aaaaai</code> (60–120 s), ou <code>Ai meu pai!</code> (mais de 2 minutos). Os rótulos se referem só à <em>duração</em>, não à intensidade da dor. Esse é o modo mais rápido e não exige que o app esteja aberto durante a contração.`,
+    howtoLi2: `<strong>Se você quiser uma medida precisa</strong> e o app já estiver aberto, toca em <code>PERDI A CONTA</code> quando a contração <em>começa</em> e toca de novo quando ela <em>termina</em>. O robô cronometra pra você no segundo certinho.`,
+    howtoLi3: `<strong>Olha o gráfico e a linha amarela de status.</strong> Cada bolinha é um intervalo entre contrações. Conforme o trabalho de parto avança, as bolinhas devem ir descendo em direção à linha verde tracejada nos 5 minutos. A linha de status te diz, com humor de robô, em qual fase o padrão parece estar.`,
+    howtoLi4: `<strong>A regra 5-1-1.</strong> A diretriz padrão é ir pra maternidade quando as contrações estão a cerca de 5 minutos de distância, cada uma com cerca de 1 minuto de duração, e esse padrão se mantém por cerca de 1 hora. O app mostra <code>5-1-1 firme(1h): SIM</code> quando essa condição é atendida.`,
+    howtoLi5: `<strong>Exporta</strong> o histórico em JSON ou CSV (no rodapé da página) se você quiser um registro pra obstetra ou parteira.`,
+    howtoWarn: `⚠ <strong>Sinais de override — vai direto pra maternidade independente do que esse app diz:</strong> bolsa estourou, sangramento vaginal, redução do movimento fetal, dor severa constante entre contrações, menos de 37 semanas com suspeita de trabalho de parto, qualquer contração que dure mais de 2 minutos, 6+ contrações em 10 minutos, ou vontade forte de fazer força.`,
+    bucketHeyLabel: "Ai",         bucketHeySub: "< 30 s",
+    bucketOwLabel: "Aaai",        bucketOwSub: "30 – 60 s",
+    bucketOuchLabel: "Aaaaai",    bucketOuchSub: "60 – 120 s",
+    bucketYikesLabel: "Ai meu pai!", bucketYikesSub: "> 120 s",
+    autoTimerIdle: "PERDI A CONTA",
+    timerCounting: (mm, ss) => `CONTANDO… ${mm}:${ss}  (toca pra parar)`,
+    timerHint: "// toca uma vez quando a contração começa, toca de novo quando termina — mede a duração exata em segundos //",
+    initialInfo: "Buffer de telemetria vazio. Aguardando primeira batida.",
+    exportJsonBtn: "BAIXAR TELEMETRIA (.json)",
+    exportCsvBtn: "BAIXAR TELEMETRIA (.csv)",
+    shareBtn: "COPIAR LINK DE COMPARTILHAMENTO",
+    shareBtnCopied: "LINK COPIADO ✓",
+    clearBtn: "APAGAR HISTÓRICO",
+    purgeConfirm: "APAGAR TODA A TELEMETRIA? Essa unidade não consegue desfazer.",
+    noShareTelemetry: "Nenhuma telemetria pra compartilhar ainda.",
+    linkCopyPrompt: "Copia esse link:",
+    sharedSaveConfirm: "Salvar esse instantâneo compartilhado NESTE aparelho? Qualquer telemetria local desse aparelho será sobrescrita.",
+    sharedMeta: (n, first, last) => ` (${n} batidas, ${first} → ${last})`,
+    yAxisLabel: "Δ minutos entre batidas (limite 60)",
+    targetLineLabel: "alvo T-5",
+    awaitingSecond: "// aguardando segunda batida pra calcular Δ //",
+    infoPulse: (pulseStr, ts, durStr, lastDelta, deltasN, avg, sigma, avgDurSec, durCount, sustained, cfPct) =>
+      `BATIDA ${pulseStr} @ ${ts}` +
+      ` — dur últ: ${durStr}` +
+      ` | Δ últ: ${lastDelta} min` +
+      ` | μ Δ(${deltasN}): ${avg} min` +
+      ` | σ: ${sigma} min` +
+      (avgDurSec !== null ? ` | μ dur(${durCount}): ${avgDurSec} s` : " | μ dur: —") +
+      ` | 5-1-1 firme(1h): ${sustained ? "SIM" : "não"}` +
+      ` | convergência heurística: ${cfPct}%`,
+    infoFirst: (ts, durStr) => `BATIDA 001 @ ${ts} — dur: ${durStr} | Δ: — | σ: — | convergência: —`,
+    footerDisclaimer: `⚠ <strong>NÃO É UM DISPOSITIVO MÉDICO.</strong> Esse app é um companheiro de brincadeira pra cronometrar intervalos entre contrações. Ele não diagnostica trabalho de parto, não substitui julgamento clínico, e não pode substituir contato com um profissional de saúde qualificado. Em caso de dúvida, liga pra sua parteira, obstetra, ou maternidade.`,
+    footerThresholdsH2: "// LIMITES E FONTES //",
+    footerLi1: `<strong>Regra 5-1-1 (camada "prep"):</strong> contrações com ~5 minutos de distância, cada uma com ~1 minuto de duração, sustentadas por ~1 hora antes de ir pra maternidade. O app verifica o intervalo de 5 minutos e a janela sustentada de 1 hora. Quando há dados de duração (seja pelo cronômetro automático "PERDI A CONTA" ou por qualquer toque de botão Ai), o app também verifica duração média ≥ 55 s (faixa de trabalho de parto ativo Mayo de 60–90 s, ver [2]); caso contrário, a metade da duração precisa ser confirmada pelo operador. Fonte: Cleveland Clinic, "Stages of Labor" (revisado em 2025-04-23): <a href="https://my.clevelandclinic.org/health/body/22640-stages-of-labor" target="_blank" rel="noopener">clevelandclinic.org/…/stages-of-labor</a>.`,
+    footerLi2: `<strong>Categorias de duração (Ai / Aaai / Aaaaai / Ai meu pai!):</strong> os limites em 30 / 60 / 120 s vêm direto de faixas publicadas. &lt; 30 s = faixa de duração de trabalho de parto inicial segundo Cleveland Clinic, "Contractions" (atualizado em 2024-08-08): <a href="https://my.clevelandclinic.org/health/symptoms/contractions" target="_blank" rel="noopener">clevelandclinic.org/…/contractions</a>. 60–120 s sobrepõe a faixa de trabalho de parto ativo da Mayo Clinic de "60 a 90 segundos" em "Stages of labor and birth": <a href="https://www.mayoclinic.org/healthy-lifestyle/labor-and-delivery/in-depth/stages-of-labor/art-20046545" target="_blank" rel="noopener">mayoclinic.org/…/stages-of-labor</a>. &gt; 120 s é o sinal de override urgente do NHS em "Signs that labour has begun" (revisado em 2023-11-09): <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>. Cada categoria armazena o ponto médio da faixa como uma <code>duration_sec</code> estimada com uma tag de fonte <code>bucket:*</code> pra que dados medidos e estimados continuem distinguíveis na exportação.`,
+    footerLi3: `<strong>Contrações de trabalho de parto ativo (camada "imminent"):</strong> "a cada dois a cinco minutos, durando cerca de 60 a 90 segundos." O app usa <em>μ &lt; 3 min</em> como aproximação pra trabalho de parto ativo profundo. Fonte: Mayo Clinic, "Stages of labor and birth": <a href="https://www.mayoclinic.org/healthy-lifestyle/labor-and-delivery/in-depth/stages-of-labor/art-20046545" target="_blank" rel="noopener">mayoclinic.org/…/stages-of-labor</a>.`,
+    footerLi4: `<strong>Trabalho de parto inicial / fase latente (camada "drill"):</strong> contrações de "20 a 30 segundos", "a cada 30 a 60 minutos"; o NHS descreve os intervalos da fase latente como altamente variáveis — "alguns minutos ... ou meia hora ou ainda mais". Fontes: Cleveland Clinic, "Contractions" (atualizado em 2024-08-08): <a href="https://my.clevelandclinic.org/health/symptoms/contractions" target="_blank" rel="noopener">clevelandclinic.org/…/contractions</a>; NHS, "Signs that labour has begun" (revisado em 2023-11-09): <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>.`,
+    footerLi5: `<strong>Taquissistolia / override urgente (camada "critical"):</strong> o NHS lista como urgente "6 ou mais contrações a cada 10 minutos" → intervalo médio &lt; 1.67 min, OU qualquer contração que dure mais de 2 minutos (&gt; 120 s). O app aplica AS DUAS metades: a checagem de intervalo sempre, e a checagem de duração quando a última contração tem dados de duração (pelo cronômetro ou por toque de botão). Fonte: NHS, "Signs that labour has begun" (revisado em 2023-11-09): <a href="https://www.nhs.uk/pregnancy/labour-and-birth/signs-that-labour-has-begun/" target="_blank" rel="noopener">nhs.uk/…/signs-that-labour-has-begun</a>.`,
+    footerLi6: `<strong>Limite cervical de trabalho de parto ativo (só contexto; não usado na classificação):</strong> ACOG/SMFM colocam a fase ativa em 6 cm de dilatação (Obstetric Care Consensus No. 1, 2014); a OMS coloca em 5 cm (Labour Care Guide, 2020); o NICE usa 4 cm (NG235, 2023-09-29). O app não consegue medir dilatação e não usa esse limite — listado aqui pra explicar por que os nomes das camadas não dependem disso. Fontes: ACOG OCC #1 (2014, via AJOG): <a href="https://www.ajog.org/article/S0002-9378(14)00055-6/fulltext" target="_blank" rel="noopener">ajog.org</a>; WHO Labour Care Guide (2020): <a href="https://iris.who.int/bitstream/handle/10665/337693/9789240017566-eng.pdf" target="_blank" rel="noopener">iris.who.int</a>; NICE NG235: <a href="https://www.nice.org.uk/guidance/ng235/chapter/Recommendations" target="_blank" rel="noopener">nice.org.uk/guidance/ng235</a>.`,
+    footerLi7: `<strong>Trabalho de parto verdadeiro vs. falso (qualitativo):</strong> ACOG: "As contrações de trabalho de parto verdadeiro têm padrão, ficam mais próximas conforme o tempo passa, e cada uma dura cerca de 60 ou 90 segundos ... continuam mesmo quando você descansa ou se mexe." Nenhuma diretriz publica um limite numérico de variância / σ. A exibição de σ do app é só ajuda visual e NÃO é usada na classificação. Fonte: ACOG FAQ, "How to Tell When Labor Begins": <a href="https://www.acog.org/womens-health/faqs/how-to-tell-when-labor-begins" target="_blank" rel="noopener">acog.org/…/how-to-tell-when-labor-begins</a>.`,
+    footerHospitalH2: "// VAI PRA MATERNIDADE INDEPENDENTE DESSE APP SE //",
+    footerHospitalP: `Bolsa estoura (especialmente se tiver cheiro ou cor), sangramento vaginal, redução do movimento fetal, dor severa constante sem alívio entre contrações, menos de 37 semanas com suspeita de trabalho de parto, contrações durando mais de 2 minutos, 6+ contrações em 10 minutos, ou vontade forte de fazer força. Fontes: NHS, "Signs that labour has begun" (2023-11-09); ACOG FAQ, "How to Tell When Labor Begins."`,
+    footerLimitsH2: "// LIMITAÇÕES DO APP //",
+    footerLimitsP: `(1) Os dados de duração são <strong>medidos</strong> (pelo botão de cronômetro automático "PERDI A CONTA") ou <strong>estimados por categoria</strong> (por um toque em um dos 4 botões Ai, em cujo caso a duração armazenada é o ponto médio da faixa selecionada — 20 / 45 / 90 / 150 s). Quando não há dados de duração, a metade "~1 minuto de duração" da regra 5-1-1 cai pra confirmação do operador. (2) A janela de estatística móvel é dos últimos 5 intervalos; a checagem "firme" de 1 hora usa todos os toques nos últimos ~65 minutos. (3) Nenhuma diretriz publica um limite numérico de regularidade/σ, então σ e o percentual de "convergência heurística" são só pra exibição e não direcionam a classificação. (4) ACOG/OMS/NICE discordam sobre o marcador de dilatação cervical pra trabalho de parto ativo (6 cm / 5 cm / 4 cm) — o app não consegue medir dilatação e não depende disso. (5) O app não sabe sobre bolsa estourando, sangramento, ou outros sinais de override listados acima; o operador precisa agir nesses independentemente. (6) "PERDI A CONTA" depende do app ficar aberto entre os toques de início e fim; se você fechar a aba ou recarregar a página no meio de uma contração o cronômetro se perde — usa um botão de categoria depois nesse caso.`,
+    // Humor re-themed to the universal Brazilian/paulistano experience of
+    // trying to get to the maternidade through São Paulo trânsito. Slang
+    // pulled from paulistano vernacular (mó, pistola, treta, bora, eita,
+    // só na correria, tá ligado, embaçado) and everyday Brazilian quirks
+    // (pão de queijo, novela, chinelo, Marginal, Waze, SAMU).
+    status: {
+      idle: [
+        "SISTEMA EM REPOUSO — carro na garagem, Marginal vazia.",
+        "Telemetria iniciada. Trânsito zero. A unidade desconfia que vai continuar assim.",
+        "Em standby. Carga em soneca, sonhando com pão de queijo.",
+        "Esta unidade está plenamente operacional e mó entediada.",
+        "Sem batidas. Sem treta. Sem trânsito. Por enquanto.",
+      ],
+      first: [
+        "BATIDA 001 REGISTRADA — começou o rolê.",
+        "Um ponto de dados. Os estatísticos querem dar uma palavrinha bem séria.",
+        "Primeira batida captada. A unidade ainda não distingue contração de espirro.",
+        "Telemetria conectada. Aperta o botão de novo enquanto ainda dá tempo.",
+        "Batida inicial detectada. Começou o cronômetro mais nervoso da Zona Leste.",
+      ],
+      drill: [
+        "NOMINAL — ensaio passou. Carga nem aí.",
+        "STATUS VERDE — isso aí é gases, quase certeza.",
+        "Checklist pré-saída: 1/47 concluído. Relaxa, põe uma novela.",
+        "Subsistemas zumbindo. Carga só remanejando órgãos por esporte.",
+        "Tá suave. É só ensaio. É tipo Braxton-Hicks-zão.",
+        "EM ESPERA — carga se recusou a entregar plano de viagem.",
+        "Intervalo gigante detectado. Unidade desconfia de alarme falso. Sem reembolso.",
+        "Janela de saída: literalmente hoje não. Tá igual Marginal segunda de manhã.",
+        "Controle de Tráfego recomenda: lanchinho, hidratação, ceticismo leve.",
+        "Nenhuma convergência. Carga preenchendo formulário em três vias, em cartório.",
+      ],
+      warming: [
+        "MOTOR ESQUENTANDO — coisa começando. Devagar. Burocraticamente.",
+        "Subsistemas aquecendo. Carga revisando o roteiro de saída no manual.",
+        "Intervalos diminuindo. A unidade tá cautelosamente otimista, pra um robô.",
+        "TREMOR SENTIDO — localiza a mala da maternidade, confere se tem calça dentro.",
+        "Sequência de partida inicializando. Saída estimada: qualquer hora dessas.",
+        "Sinais precoces de convergência. Carga se alongando. Literalmente.",
+        "Frio na barriga detectado — na carga E no motorista.",
+        "STATUS AMARELO — você tem agora permissão oficial pra andar pra lá e pra cá.",
+        "Tendência do intervalo: encolhendo. Confiança: ainda nível robô.",
+        "Esquentando. Unidade recomenda terminar esse episódio AGORA.",
+      ],
+      approach: [
+        "FASE DE APROXIMAÇÃO — trajetória mais ou menos nominal. Liga o motor.",
+        "Não é mais ensaio. Provavelmente. Atualização pendente.",
+        "Convergência detectada. Unidade 74% confiante. Os outros 26% é pânico puro.",
+        "Recomenda-se que o motorista tome um café mas continue dentro da lei seca.",
+        "Intervalos apertando. A carga tá pistola.",
+        "CORREDOR DE APROXIMAÇÃO LIBERADO — carrega o celular, pega as chaves, respira.",
+        "T-menos: alguma hora. Provavelmente já já.",
+        "Unidade revisa previsão de 'talvez' pra 'eita'.",
+        "Prepara pra sair — devagar, com dignidade. Nada de correria ainda.",
+        "Convergindo. Convergindo. Convergindo. [buzina distante]",
+      ],
+      prep: [
+        "PREPARAR SAÍDA — rota travada no Waze. Destino: maternidade.",
+        "Janela abrindo. Unidade sugere fortemente: bota o sapato (chinelo não vale).",
+        "É isso. Provavelmente. É quase certeza isso. Entra no carro.",
+        "CONVERGÊNCIA CONFIRMADA — cadência de 5 minutos firme. Faz acontecer.",
+        "STATUS VERMELHO — carga protocolando intenção formal de desembarque.",
+        "Unidade recomenda: chaves, toalhas, voz calma, direção pra valer.",
+        "PREP DE SAÍDA — contagem regressiva travada em T-tipo-agora.",
+        "Regularidade alcançada. Pé na maternidade — urgente, mas sem multa.",
+        "PODE IR — esta unidade é legalmente obrigada a mandar você se mexer.",
+        "Cadência de 5 minutos travada. A biologia assumiu o volante. Tipo, literalmente.",
+      ],
+      imminent: [
+        "SAÍDA IMINENTE — boa sorte, humana.",
+        "JANELA EIS CONFIRMADA — carga deu entrada na portaria. BORA, tá atrasada!",
+        "IGNIÇÃO ATIVADA — esta unidade não tem qualificação pra ajudar daqui.",
+        "T-MENOS POUCO — só na correria, recomenda-se que você já esteja na maternidade.",
+        "Esta unidade deseja formalmente bater o ponto e sair dessa situação.",
+        "CONVERGÊNCIA TRAVADA — carga exigindo visto de saída. CONCEDIDO.",
+        "Boa sorte, brava piloto de carne e osso. Essa é sua hora mais brilhante.",
+        "SAÍDA IMINENTE — por motivos legais, por favor já esteja na maternidade.",
+        "EIS ALCANÇADO — saída da carga iminente. A unidade bate continência.",
+        "Aqui é a parte onde os humanos assumem. Vai com Deus.",
+      ],
+      critical: [
+        "EMERGÊNCIA TOTAL — BOA SORTE, HUMANA.",
+        "ENTREGA RÁPIDA NÃO PROGRAMADA — segura a carga e NÃO DERRUBA.",
+        "ESTA UNIDADE NÃO É CERTIFICADA PRA APARAR. BOA SORTE.",
+        "ABORTAR ABORTAR ABORTAR — espera, o contrário. SAIR SAIR SAIR.",
+        "SEPARAÇÃO EMERGENCIAL — improvisa maternidade ou toalha, o que tiver mais perto.",
+        "Carga atingiu energia de protagonista. Unidade saindo de cena.",
+        "CADÊNCIA CRÍTICA — se não dá tempo de chegar, liga pro SAMU agora (192).",
+        "Tá acontecendo. Tá acontecendo AGORA. A unidade pede desculpas pelo tom.",
+        "DESMONTAGEM RÁPIDA NÃO PROGRAMADA DA FASE DE TRABALHO DE PARTO — vai vai vai.",
+        "MAYDAY MAYDAY — entrega biológica em curso. A unidade se recusa.",
+      ],
+    },
+  },
 };
 
 // Locale resolution: explicit user choice (localStorage) overrides
-// browser auto-detection. Anything starting with "el" → Greek.
+// browser auto-detection. "el*" → Greek, "pt*" → Brazilian Portuguese.
 const LANG_KEY = "eis_lang";
 function detectLang() {
   const stored = localStorage.getItem(LANG_KEY);
   if (stored && I18N[stored]) return stored;
-  return (navigator.language || "en").toLowerCase().startsWith("el") ? "el" : "en";
+  const code = (navigator.language || "en").toLowerCase();
+  if (code.startsWith("el")) return "el";
+  if (code.startsWith("pt")) return "pt";
+  return "en";
 }
 let LANG = detectLang();
 let T = I18N[LANG];
