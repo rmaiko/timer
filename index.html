@@ -3,28 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Now</title>
+<title>EIS Countdown — Payload Launch Monitor</title>
 <style>
-  :root { font-family: system-ui, sans-serif; }
-  body { margin: 0; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: #fafafa; color: #222; }
-  h1 { margin: 0; font-weight: 500; }
-  .controls { display: flex; gap: 12px; align-items: center; }
-  button { font-size: 16px; padding: 10px 18px; border: 1px solid #ccc; background: white; border-radius: 6px; cursor: pointer; }
-  button.primary { font-size: 28px; padding: 18px 42px; background: #2d7ef7; color: white; border-color: #2d7ef7; }
-  button:hover { filter: brightness(0.95); }
-  #info { font-size: 14px; color: #666; }
-  canvas { background: white; border: 1px solid #ddd; border-radius: 6px; max-width: 100%; }
+  :root { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+  body { margin: 0; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; background: #0b0f16; color: #d6e1f0; }
+  h1 { margin: 0; font-weight: 600; letter-spacing: 2px; color: #a9d2ff; }
+  .subtitle { margin: -8px 0 0; font-size: 13px; color: #6b7a90; letter-spacing: 1px; }
+  .controls { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  button { font-family: inherit; font-size: 14px; padding: 10px 18px; border: 1px solid #2b3b55; background: #121a28; color: #d6e1f0; border-radius: 6px; cursor: pointer; letter-spacing: 1px; }
+  button.primary { font-size: 26px; padding: 20px 48px; background: #ff4757; color: white; border-color: #ff4757; font-weight: 700; letter-spacing: 3px; box-shadow: 0 0 24px rgba(255,71,87,0.35); }
+  button:hover { filter: brightness(1.15); }
+  #info { font-size: 13px; color: #8aa0bf; text-align: center; min-height: 1.4em; max-width: 720px; }
+  #status { font-size: 14px; color: #ffd166; text-align: center; min-height: 1.4em; max-width: 720px; font-weight: 600; }
+  canvas { background: #0f1624; border: 1px solid #223149; border-radius: 6px; max-width: 100%; }
 </style>
 </head>
 <body>
-  <h1>Now</h1>
-  <button class="primary" id="nowBtn">Now</button>
-  <div id="info">0 presses recorded</div>
+  <h1>EIS COUNTDOWN</h1>
+  <p class="subtitle">// payload launch monitor · convergence target: T-5min //</p>
+  <button class="primary" id="nowBtn">CONTRACTION</button>
+  <div id="status">SYSTEM IDLE — payload secured in launchpad.</div>
+  <div id="info">Telemetry buffer empty. Awaiting first pulse.</div>
   <canvas id="graph" width="800" height="420"></canvas>
   <div class="controls">
-    <button id="exportBtn">Export JSON</button>
-    <button id="exportCsvBtn">Export CSV</button>
-    <button id="clearBtn">Clear</button>
+    <button id="exportBtn">DOWNLOAD TELEMETRY (.json)</button>
+    <button id="exportCsvBtn">DOWNLOAD TELEMETRY (.csv)</button>
+    <button id="clearBtn">PURGE LOG</button>
   </div>
 
 <script>
@@ -59,6 +63,10 @@ function fmtAxisTime(ts) {
   return `${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+const TARGET_MIN = 5;        // convergence target (minutes)
+const TARGET_BAND = 1;       // ±band around target
+const FUNNEL_START_HALF = 25; // half-height of funnel mouth at left edge
+
 function draw() {
   const W = canvas.width, H = canvas.height;
   const padL = 60, padR = 20, padT = 20, padB = 50;
@@ -67,8 +75,10 @@ function draw() {
 
   ctx.clearRect(0, 0, W, H);
 
+  const yScale = v => padT + plotH - (v / 60) * plotH;
+
   // axes
-  ctx.strokeStyle = "#333";
+  ctx.strokeStyle = "#3a4a66";
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(padL, padT);
@@ -76,19 +86,19 @@ function draw() {
   ctx.lineTo(padL + plotW, padT + plotH);
   ctx.stroke();
 
-  // y-axis: 0..60 minutes
-  ctx.fillStyle = "#333";
-  ctx.font = "12px system-ui, sans-serif";
+  // y grid
+  ctx.font = "11px ui-monospace, Menlo, monospace";
   ctx.textAlign = "right";
   ctx.textBaseline = "middle";
   const yTicks = [0, 10, 20, 30, 40, 50, 60];
   for (const m of yTicks) {
-    const y = padT + plotH - (m / 60) * plotH;
-    ctx.strokeStyle = "#eee";
+    const y = yScale(m);
+    ctx.strokeStyle = "#1a2638";
     ctx.beginPath();
     ctx.moveTo(padL, y);
     ctx.lineTo(padL + plotW, y);
     ctx.stroke();
+    ctx.fillStyle = "#6b7a90";
     ctx.fillText(String(m), padL - 6, y);
   }
 
@@ -97,8 +107,51 @@ function draw() {
   ctx.translate(16, padT + plotH / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.textAlign = "center";
-  ctx.fillText("Δ minutes (capped at 60)", 0, 0);
+  ctx.fillStyle = "#6b7a90";
+  ctx.fillText("Δ minutes between pulses (cap 60)", 0, 0);
   ctx.restore();
+
+  // target band (convergence zone)
+  const yTargetTop = yScale(TARGET_MIN + TARGET_BAND);
+  const yTargetBot = yScale(TARGET_MIN - TARGET_BAND);
+  ctx.fillStyle = "rgba(46, 213, 115, 0.10)";
+  ctx.fillRect(padL, yTargetTop, plotW, yTargetBot - yTargetTop);
+
+  // funnel: wide on left, converging to target on right
+  const yFunnelTopL = yScale(Math.min(60, TARGET_MIN + FUNNEL_START_HALF));
+  const yFunnelBotL = yScale(Math.max(0, TARGET_MIN - FUNNEL_START_HALF));
+  const yFunnelR = yScale(TARGET_MIN);
+  ctx.fillStyle = "rgba(105, 180, 255, 0.06)";
+  ctx.beginPath();
+  ctx.moveTo(padL, yFunnelTopL);
+  ctx.lineTo(padL + plotW, yFunnelR - 0.5);
+  ctx.lineTo(padL + plotW, yFunnelR + 0.5);
+  ctx.lineTo(padL, yFunnelBotL);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = "rgba(105, 180, 255, 0.35)";
+  ctx.setLineDash([4, 4]);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, yFunnelTopL); ctx.lineTo(padL + plotW, yFunnelR);
+  ctx.moveTo(padL, yFunnelBotL); ctx.lineTo(padL + plotW, yFunnelR);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // target line
+  const yTarget = yScale(TARGET_MIN);
+  ctx.strokeStyle = "rgba(46, 213, 115, 0.8)";
+  ctx.setLineDash([6, 4]);
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(padL, yTarget);
+  ctx.lineTo(padL + plotW, yTarget);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "rgba(46, 213, 115, 0.9)";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "bottom";
+  ctx.fillText("T-5 EIS target", padL + 6, yTarget - 2);
 
   // build points
   const points = [];
@@ -110,8 +163,10 @@ function draw() {
 
   if (points.length === 0) {
     ctx.textAlign = "center";
-    ctx.fillStyle = "#999";
-    ctx.fillText("Press \"Now\" at least twice to see points.", padL + plotW/2, padT + plotH/2);
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#6b7a90";
+    ctx.font = "13px ui-monospace, Menlo, monospace";
+    ctx.fillText("// awaiting second pulse to compute Δ telemetry //", padL + plotW/2, padT + plotH/2);
     return;
   }
 
@@ -121,27 +176,28 @@ function draw() {
   if (xMin === xMax) { xMin -= 60000; xMax += 60000; }
 
   const xScale = t => padL + ((t - xMin) / (xMax - xMin)) * plotW;
-  const yScale = v => padT + plotH - (v / 60) * plotH;
 
   // x ticks: up to 5
   const xTickCount = Math.min(5, points.length);
-  ctx.fillStyle = "#333";
+  ctx.fillStyle = "#6b7a90";
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
+  ctx.font = "11px ui-monospace, Menlo, monospace";
   for (let i = 0; i < xTickCount; i++) {
     const t = xMin + ((xMax - xMin) * i) / Math.max(1, xTickCount - 1);
     const x = xScale(t);
-    ctx.strokeStyle = "#ddd";
+    ctx.strokeStyle = "#1a2638";
     ctx.beginPath();
     ctx.moveTo(x, padT);
     ctx.lineTo(x, padT + plotH);
     ctx.stroke();
+    ctx.fillStyle = "#6b7a90";
     ctx.fillText(fmtAxisTime(t), x, padT + plotH + 6);
   }
 
-  // line
-  ctx.strokeStyle = "#2d7ef7";
-  ctx.lineWidth = 2;
+  // connecting line
+  ctx.strokeStyle = "rgba(169, 210, 255, 0.55)";
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
   points.forEach((p, i) => {
     const x = xScale(p.x), y = yScale(p.y);
@@ -149,21 +205,54 @@ function draw() {
   });
   ctx.stroke();
 
-  // dots
-  ctx.fillStyle = "#2d7ef7";
+  // dots — color based on distance from target
   for (const p of points) {
+    const d = Math.abs(p.y - TARGET_MIN);
+    const inBand = d <= TARGET_BAND;
+    ctx.fillStyle = inBand ? "#2ed573" : d < 10 ? "#ffd166" : "#a9d2ff";
     ctx.beginPath();
-    ctx.arc(xScale(p.x), yScale(p.y), 4, 0, Math.PI * 2);
+    ctx.arc(xScale(p.x), yScale(p.y), 4.5, 0, Math.PI * 2);
     ctx.fill();
   }
+}
+
+function robotStatus(lastDeltaMin, n) {
+  if (n === 0) return "SYSTEM IDLE — payload secured in launchpad.";
+  if (n === 1) return "PULSE 001 ACQUIRED — telemetry link established. Awaiting second datum.";
+  if (lastDeltaMin > 30) return "STATUS: NOMINAL STANDBY — payload has no intention of leaving the garage.";
+  if (lastDeltaMin > 20) return "STATUS: GREEN — subsystems humming politely. No launch signature detected.";
+  if (lastDeltaMin > 15) return "PRE-IGNITION RUMBLE DETECTED — recommend locating hospital bag coordinates.";
+  if (lastDeltaMin > 10) return "T-MINUS UNCLEAR — propulsion sequence initializing. Caffeine non-essential personnel.";
+  if (lastDeltaMin > 7)  return "APPROACH PHASE — convergence trajectory looking plausible. Warm up the launch vehicle.";
+  if (lastDeltaMin >= 4 && lastDeltaMin <= 6) return "⚠ EIS WINDOW REACHED — 5-MINUTE CADENCE CONFIRMED. PROCEED TO LAUNCH FACILITY. THIS IS NOT A DRILL.";
+  if (lastDeltaMin >= 2) return "⚠⚠ SUB-NOMINAL SEPARATION — payload egress imminent. Depart facility NOW.";
+  return "⚠⚠⚠ EMERGENCY DEORBIT — this unit is not qualified to catch. GOOD LUCK HUMAN.";
 }
 
 function updateInfo() {
   const n = presses.length;
   const info = document.getElementById("info");
-  if (n === 0) info.textContent = "0 presses recorded";
-  else if (n === 1) info.textContent = `1 press recorded at ${fmtTime(presses[0])}`;
-  else info.textContent = `${n} presses recorded — last at ${fmtTime(presses[n-1])}`;
+  const status = document.getElementById("status");
+  if (n === 0) {
+    info.textContent = "Telemetry buffer empty. Awaiting first pulse.";
+    status.textContent = robotStatus(null, 0);
+    return;
+  }
+  const last = presses[n-1];
+  if (n === 1) {
+    info.textContent = `PULSE 001 @ ${fmtTime(last)} — Δ: —`;
+    status.textContent = robotStatus(null, 1);
+    return;
+  }
+  const deltaMin = (last - presses[n-2]) / 60000;
+  // rolling average over last 5 intervals
+  const recent = [];
+  for (let i = Math.max(1, presses.length - 5); i < presses.length; i++) {
+    recent.push((presses[i] - presses[i-1]) / 60000);
+  }
+  const avg = recent.reduce((a,b)=>a+b,0) / recent.length;
+  info.textContent = `PULSE ${String(n).padStart(3,"0")} @ ${fmtTime(last)} — Δ last: ${deltaMin.toFixed(2)} min — Δ avg(${recent.length}): ${avg.toFixed(2)} min`;
+  status.textContent = robotStatus(deltaMin, n);
 }
 
 function render() {
@@ -191,7 +280,7 @@ function download(filename, content, mime) {
 
 document.getElementById("exportBtn").addEventListener("click", () => {
   const data = presses.map(ts => ({ timestamp_ms: ts, iso: new Date(ts).toISOString() }));
-  download("now-presses.json", JSON.stringify(data, null, 2), "application/json");
+  download("eis-telemetry.json", JSON.stringify(data, null, 2), "application/json");
 });
 
 document.getElementById("exportCsvBtn").addEventListener("click", () => {
@@ -200,11 +289,11 @@ document.getElementById("exportCsvBtn").addEventListener("click", () => {
     const delta = i === 0 ? "" : ((ts - presses[i-1]) / 60000).toFixed(4);
     rows.push(`${i},${ts},${new Date(ts).toISOString()},${delta}`);
   });
-  download("now-presses.csv", rows.join("\n"), "text/csv");
+  download("eis-telemetry.csv", rows.join("\n"), "text/csv");
 });
 
 document.getElementById("clearBtn").addEventListener("click", () => {
-  if (confirm("Clear all recorded presses?")) {
+  if (confirm("PURGE ALL TELEMETRY? This unit cannot undo.")) {
     presses = [];
     save(presses);
     render();
