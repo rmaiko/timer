@@ -56,11 +56,31 @@
   footer li { margin-bottom: 4px; }
   footer a { color: #a9d2ff; word-break: break-all; }
   footer .limits { font-style: italic; color: #8aa0bf; }
+
+  /* Shared-view banner */
+  #sharedBanner { display: none; max-width: 820px; width: 100%; background: #1a2638; border: 1px solid #3a5780; border-left: 4px solid #a9d2ff; color: #d6e1f0; padding: 12px 16px; border-radius: 6px; font-size: 13px; line-height: 1.5; }
+  #sharedBanner.active { display: block; }
+  #sharedBanner strong { color: #a9d2ff; letter-spacing: 1px; }
+  #sharedBanner .banner-actions { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+  #sharedBanner button { font-size: 12px; padding: 6px 12px; }
+  body.shared-mode .bucket-grid,
+  body.shared-mode .timer-wrap,
+  body.shared-mode #clearBtn,
+  body.shared-mode #shareBtn { display: none; }
 </style>
 </head>
 <body>
   <h1>EIS COUNTDOWN</h1>
   <p class="subtitle">// payload launch monitor · convergence target: T-5min //</p>
+
+  <div id="sharedBanner">
+    <strong>// SHARED VIEW //</strong> — read-only snapshot
+    <span id="sharedMeta"></span>. Input controls are disabled.
+    <div class="banner-actions">
+      <button id="sharedSaveBtn">SAVE TO THIS DEVICE (overwrites local)</button>
+      <button id="sharedExitBtn">EXIT SHARED VIEW</button>
+    </div>
+  </div>
 
   <details class="howto" open>
     <summary>// HOW TO USE THIS APP //</summary>
@@ -127,6 +147,7 @@
   <div class="controls">
     <button id="exportBtn">DOWNLOAD TELEMETRY (.json)</button>
     <button id="exportCsvBtn">DOWNLOAD TELEMETRY (.csv)</button>
+    <button id="shareBtn">COPY SHARE LINK</button>
     <button id="clearBtn">PURGE LOG</button>
   </div>
 
@@ -307,7 +328,36 @@ const BUCKETS = {
   yikes: { label: "Oooo….w!",  sub: "> 120 s",    midSec: 150 },
 };
 
-let presses = load();
+// --- Shareable snapshot via URL hash -----------------------------------
+// Encoding: base64url(JSON.stringify(presses)) under location.hash as
+// #share=<payload>. Kept client-side (hash, not query) so nothing hits a
+// server. When a share payload is present we enter read-only "shared
+// view" mode and do not touch localStorage until the viewer explicitly
+// saves.
+
+function b64urlEncode(str) {
+  return btoa(unescape(encodeURIComponent(str)))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function b64urlDecode(str) {
+  str = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (str.length % 4) str += "=";
+  return decodeURIComponent(escape(atob(str)));
+}
+
+function parseSharedFromHash() {
+  const m = (location.hash || "").match(/[#&]share=([^&]+)/);
+  if (!m) return null;
+  try {
+    const arr = JSON.parse(b64urlDecode(m[1]));
+    if (!Array.isArray(arr)) return null;
+    return arr.filter(p => p && typeof p.start_ts === "number");
+  } catch { return null; }
+}
+
+const sharedPresses = parseSharedFromHash();
+const sharedMode = sharedPresses !== null;
+let presses = sharedMode ? sharedPresses : load();
 
 const canvas = document.getElementById("graph");
 const ctx = canvas.getContext("2d");
@@ -845,6 +895,50 @@ document.getElementById("clearBtn").addEventListener("click", () => {
     render();
   }
 });
+
+// --- Share link --------------------------------------------------------
+
+document.getElementById("shareBtn").addEventListener("click", async () => {
+  if (presses.length === 0) {
+    alert("No telemetry to share yet.");
+    return;
+  }
+  const payload = b64urlEncode(JSON.stringify(presses));
+  const url = `${location.origin}${location.pathname}${location.search}#share=${payload}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    const btn = document.getElementById("shareBtn");
+    const orig = btn.textContent;
+    btn.textContent = "LINK COPIED ✓";
+    setTimeout(() => { btn.textContent = orig; }, 1800);
+  } catch {
+    prompt("Copy this link:", url);
+  }
+});
+
+// --- Shared-view banner wiring ----------------------------------------
+
+if (sharedMode) {
+  document.body.classList.add("shared-mode");
+  const banner = document.getElementById("sharedBanner");
+  banner.classList.add("active");
+  const meta = document.getElementById("sharedMeta");
+  if (presses.length > 0) {
+    const first = new Date(presses[0].start_ts);
+    const last = new Date(presses[presses.length - 1].start_ts);
+    meta.textContent = ` (${presses.length} pulses, ${first.toLocaleString()} → ${last.toLocaleString()})`;
+  }
+  document.getElementById("sharedSaveBtn").addEventListener("click", () => {
+    if (!confirm("Save this shared snapshot to THIS device? Any local telemetry already on this device will be overwritten.")) return;
+    save(presses);
+    history.replaceState(null, "", location.pathname + location.search);
+    location.reload();
+  });
+  document.getElementById("sharedExitBtn").addEventListener("click", () => {
+    history.replaceState(null, "", location.pathname + location.search);
+    location.reload();
+  });
+}
 
 render();
 </script>
