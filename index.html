@@ -49,6 +49,7 @@
   #info { font-size: 13px; color: #8aa0bf; text-align: center; min-height: 1.4em; max-width: 720px; }
   #status { font-size: 14px; color: #ffd166; text-align: center; min-height: 1.4em; max-width: 720px; font-weight: 600; }
   canvas { background: #0f1624; border: 1px solid #223149; border-radius: 6px; max-width: 100%; }
+  #overview { margin-top: 6px; }
   footer { max-width: 820px; margin-top: 24px; font-size: 12px; color: #6b7a90; line-height: 1.55; }
   footer h2 { font-size: 13px; color: #a9d2ff; letter-spacing: 1px; margin: 16px 0 6px; }
   footer .disclaimer { border: 1px solid #6b3a2b; background: #1f1410; color: #ffb199; padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; }
@@ -153,6 +154,7 @@
   <div id="status">SYSTEM IDLE — payload secured in launchpad.</div>
   <div id="info">Telemetry buffer empty. Awaiting first pulse.</div>
   <canvas id="graph" width="800" height="420"></canvas>
+  <canvas id="overview" width="800" height="140"></canvas>
   <div class="controls">
     <button id="exportBtn" data-i18n="exportJsonBtn">DOWNLOAD TELEMETRY (.json)</button>
     <button id="exportCsvBtn" data-i18n="exportCsvBtn">DOWNLOAD TELEMETRY (.csv)</button>
@@ -1061,6 +1063,8 @@ let presses = sharedMode ? sharedPresses : load();
 
 const canvas = document.getElementById("graph");
 const ctx = canvas.getContext("2d");
+const canvasOv = document.getElementById("overview");
+const ctxOv = canvasOv.getContext("2d");
 
 function fmtTime(ts) {
   const d = new Date(ts);
@@ -1163,46 +1167,28 @@ function draw() {
   ctx.textBaseline = "bottom";
   ctx.fillText(T.targetLineLabel, padL + 6, yTarget - 2);
 
-  // build points
-  const points = [];
+  // build all points (full history, clamped for display)
+  const allPoints = [];
   for (let i = 1; i < presses.length; i++) {
     const dtMs = presses[i].start_ts - presses[i-1].start_ts;
-    const dtMin = Math.min(15, Math.max(0, dtMs / 60000));
-    points.push({ x: presses[i].start_ts, y: dtMin });
+    allPoints.push({ x: presses[i].start_ts, y: Math.min(15, Math.max(0, dtMs / 60000)) });
   }
 
-  if (points.length === 0) {
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#6b7a90";
-    ctx.font = "13px ui-monospace, Menlo, monospace";
-    ctx.fillText(T.awaitingSecond, padL + plotW/2, padT + plotH/2);
-    return;
-  }
+  // x window: fixed last 2 hours
+  const windowMs = 2 * 60 * 60 * 1000;
+  const xMax = allPoints.length > 0 ? allPoints[allPoints.length - 1].x : Date.now();
+  const xMin = xMax - windowMs;
+  const xScale = t => padL + ((t - xMin) / windowMs) * plotW;
 
-  // x range
-  let xMin = points[0].x;
-  let xMax = points[points.length - 1].x;
-  if (xMin === xMax) { xMin -= 60000; xMax += 60000; }
-
-  const xLogK = 9;
-  const xScale = t => {
-    const ratio = (xMax === xMin) ? 0 : (t - xMin) / (xMax - xMin);
-    const mapped = Math.log1p(ratio * xLogK) / Math.log1p(xLogK);
-    return padL + mapped * plotW;
-  };
-
-  // x ticks: up to 5, placed at visually even positions via inverse log scale
-  const xTickCount = Math.min(5, points.length);
+  // x ticks: 5 evenly spaced across the 2-hour window
+  const xTickCount = 5;
   ctx.fillStyle = "#6b7a90";
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
   ctx.font = "11px ui-monospace, Menlo, monospace";
   for (let i = 0; i < xTickCount; i++) {
-    const frac = i / Math.max(1, xTickCount - 1);
-    const x = padL + frac * plotW;
-    const ratio = (Math.exp(frac * Math.log1p(xLogK)) - 1) / xLogK;
-    const t = xMin + ratio * (xMax - xMin);
+    const t = xMin + (windowMs * i) / (xTickCount - 1);
+    const x = xScale(t);
     ctx.strokeStyle = "#1a2638";
     ctx.beginPath();
     ctx.moveTo(x, padT);
@@ -1211,6 +1197,19 @@ function draw() {
     ctx.fillStyle = "#6b7a90";
     ctx.fillText(fmtAxisTime(t), x, padT + plotH + 6);
   }
+
+  if (allPoints.length === 0) {
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#6b7a90";
+    ctx.font = "13px ui-monospace, Menlo, monospace";
+    ctx.fillText(T.awaitingSecond, padL + plotW/2, padT + plotH/2);
+    return;
+  }
+
+  // only render dots/line for points within the window
+  const points = allPoints.filter(p => p.x >= xMin);
+  if (points.length === 0) return;
 
   // connecting line
   ctx.strokeStyle = "rgba(169, 210, 255, 0.55)";
@@ -1231,6 +1230,116 @@ function draw() {
     ctx.arc(xScale(p.x), yScale(p.y), 4.5, 0, Math.PI * 2);
     ctx.fill();
   }
+}
+
+function drawOverview() {
+  const W = canvasOv.width, H = canvasOv.height;
+  const padL = 60, padR = 20, padT = 15, padB = 35;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  ctxOv.clearRect(0, 0, W, H);
+
+  // log y-scale: 1 to 100 minutes
+  const yLogMin = Math.log(1), yLogMax = Math.log(100);
+  const yScale = v => {
+    const clamped = Math.max(1, Math.min(100, v));
+    return padT + plotH - (Math.log(clamped) - yLogMin) / (yLogMax - yLogMin) * plotH;
+  };
+
+  // axes
+  ctxOv.strokeStyle = "#3a4a66";
+  ctxOv.lineWidth = 1;
+  ctxOv.beginPath();
+  ctxOv.moveTo(padL, padT);
+  ctxOv.lineTo(padL, padT + plotH);
+  ctxOv.lineTo(padL + plotW, padT + plotH);
+  ctxOv.stroke();
+
+  // y grid
+  ctxOv.font = "10px ui-monospace, Menlo, monospace";
+  ctxOv.textAlign = "right";
+  ctxOv.textBaseline = "middle";
+  for (const m of [1, 2, 5, 10, 20, 50, 100]) {
+    const y = yScale(m);
+    ctxOv.strokeStyle = "#1a2638";
+    ctxOv.beginPath();
+    ctxOv.moveTo(padL, y);
+    ctxOv.lineTo(padL + plotW, y);
+    ctxOv.stroke();
+    ctxOv.fillStyle = "#6b7a90";
+    ctxOv.fillText(String(m), padL - 6, y);
+  }
+
+  // target line at 5 min
+  const yTarget = yScale(TARGET_MIN);
+  ctxOv.strokeStyle = "rgba(46, 213, 115, 0.8)";
+  ctxOv.setLineDash([6, 4]);
+  ctxOv.lineWidth = 1.5;
+  ctxOv.beginPath();
+  ctxOv.moveTo(padL, yTarget);
+  ctxOv.lineTo(padL + plotW, yTarget);
+  ctxOv.stroke();
+  ctxOv.setLineDash([]);
+
+  // build all points (clamped to [1, 100])
+  const points = [];
+  for (let i = 1; i < presses.length; i++) {
+    const dtMin = (presses[i].start_ts - presses[i-1].start_ts) / 60000;
+    points.push({ x: presses[i].start_ts, y: Math.max(1, Math.min(100, dtMin)) });
+  }
+
+  if (points.length === 0) return;
+
+  // x range: full history, linear
+  let xMin = points[0].x;
+  let xMax = points[points.length - 1].x;
+  if (xMin === xMax) { xMin -= 60000; xMax += 60000; }
+  const xScale = t => padL + ((t - xMin) / (xMax - xMin)) * plotW;
+
+  // x ticks: up to 5
+  const xTickCount = Math.min(5, points.length + 1);
+  ctxOv.font = "10px ui-monospace, Menlo, monospace";
+  ctxOv.textAlign = "center";
+  ctxOv.textBaseline = "top";
+  for (let i = 0; i < xTickCount; i++) {
+    const t = xMin + ((xMax - xMin) * i) / Math.max(1, xTickCount - 1);
+    const x = xScale(t);
+    ctxOv.strokeStyle = "#1a2638";
+    ctxOv.beginPath();
+    ctxOv.moveTo(x, padT);
+    ctxOv.lineTo(x, padT + plotH);
+    ctxOv.stroke();
+    ctxOv.fillStyle = "#6b7a90";
+    ctxOv.fillText(fmtAxisTime(t), x, padT + plotH + 4);
+  }
+
+  // connecting line
+  ctxOv.strokeStyle = "rgba(169, 210, 255, 0.55)";
+  ctxOv.lineWidth = 1;
+  ctxOv.beginPath();
+  points.forEach((p, i) => {
+    const x = xScale(p.x), y = yScale(p.y);
+    if (i === 0) ctxOv.moveTo(x, y); else ctxOv.lineTo(x, y);
+  });
+  ctxOv.stroke();
+
+  // dots
+  for (const p of points) {
+    const d = Math.abs(p.y - TARGET_MIN);
+    const inBand = d <= TARGET_BAND;
+    ctxOv.fillStyle = inBand ? "#2ed573" : d < 10 ? "#ffd166" : "#a9d2ff";
+    ctxOv.beginPath();
+    ctxOv.arc(xScale(p.x), yScale(p.y), 3, 0, Math.PI * 2);
+    ctxOv.fill();
+  }
+
+  // chart label
+  ctxOv.fillStyle = "#3a4a66";
+  ctxOv.textAlign = "right";
+  ctxOv.textBaseline = "top";
+  ctxOv.font = "10px ui-monospace, Menlo, monospace";
+  ctxOv.fillText("full history · log scale", padL + plotW - 4, padT + 2);
 }
 
 // --- Telemetry stats ---------------------------------------------------
@@ -1424,6 +1533,7 @@ function updateInfo() {
 function render() {
   updateInfo();
   draw();
+  drawOverview();
 }
 
 // --- Input handlers ----------------------------------------------------
