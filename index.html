@@ -28,6 +28,12 @@
   /* Secondary input: measured tap-to-start/end */
   .timer-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .timer-wrap .hint { font-size: 11px; color: #6b7a90; letter-spacing: 1px; text-align: center; max-width: 360px; }
+  .timer-row { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; justify-content: center; }
+  .countdown { display: none; flex-direction: column; align-items: center; justify-content: center; padding: 10px 18px; border: 2px solid #a9d2ff; border-radius: 8px; background: #0f1624; color: #a9d2ff; letter-spacing: 2px; font-weight: 700; min-width: 140px; }
+  .countdown.visible { display: flex; }
+  .countdown.overdue { border-color: #ffd166; color: #ffd166; }
+  .countdown .cd-label { font-size: 10px; opacity: 0.75; letter-spacing: 1.5px; }
+  .countdown .cd-value { font-size: 22px; font-variant-numeric: tabular-nums; }
   button.auto-timer { font-size: 17px; padding: 16px 32px; background: #121a28; color: #00d2d3; border: 2px dashed #00d2d3; border-radius: 8px; letter-spacing: 2.5px; min-width: 320px; font-weight: 700; }
   button.auto-timer.timing { background: #3a0f14; color: #fff; border-color: #ff4757; border-style: solid; animation: timer-pulse 1.1s ease-in-out infinite; }
   @keyframes timer-pulse {
@@ -147,7 +153,13 @@
   </div>
 
   <div class="timer-wrap">
-    <button class="auto-timer" id="autoTimerBtn" data-i18n="autoTimerIdle">I CAN'T COUNT</button>
+    <div class="timer-row">
+      <button class="auto-timer" id="autoTimerBtn" data-i18n="autoTimerIdle">I CAN'T COUNT</button>
+      <div class="countdown" id="nextCountdown">
+        <span class="cd-label" data-i18n="nextLabel">NEXT IN</span>
+        <span class="cd-value" id="nextCountdownValue">--:--</span>
+      </div>
+    </div>
     <span class="hint" data-i18n="timerHint">// tap once when the contraction starts, tap again when it ends — measures exact duration in seconds //</span>
   </div>
 
@@ -320,6 +332,8 @@ const I18N = {
     autoTimerIdle: "I CAN'T COUNT",
     timerCounting: (mm, ss) => `COUNTING… ${mm}:${ss}  (tap to stop)`,
     timerHint: "// tap once when the contraction starts, tap again when it ends — measures exact duration in seconds //",
+    nextLabel: "NEXT IN",
+    nextOverdueLabel: "OVERDUE",
     initialInfo: "Telemetry buffer empty. Awaiting first pulse.",
     exportJsonBtn: "DOWNLOAD TELEMETRY (.json)",
     exportCsvBtn: "DOWNLOAD TELEMETRY (.csv)",
@@ -469,6 +483,8 @@ const I18N = {
     autoTimerIdle: "ΔΕΝ ΜΠΟΡΩ ΝΑ ΜΕΤΡΗΣΩ",
     timerCounting: (mm, ss) => `ΜΕΤΡΩ… ${mm}:${ss}  (πάτα για στάση)`,
     timerHint: "// πάτα μία φορά όταν αρχίζει η συστολή, πάτα ξανά όταν τελειώνει — μετρά ακριβή διάρκεια σε δευτερόλεπτα //",
+    nextLabel: "ΕΠΟΜΕΝΗ ΣΕ",
+    nextOverdueLabel: "ΕΚΠΡΟΘΕΣΜΗ",
     initialInfo: "Ναυτικό ημερολόγιο άδειο. Αναμονή πρώτης κουπιάς.",
     exportJsonBtn: "ΛΗΨΗ ΗΜΕΡΟΛΟΓΙΟΥ (.json)",
     exportCsvBtn: "ΛΗΨΗ ΗΜΕΡΟΛΟΓΙΟΥ (.csv)",
@@ -623,6 +639,8 @@ const I18N = {
     autoTimerIdle: "PERDI A CONTA",
     timerCounting: (mm, ss) => `CONTANDO… ${mm}:${ss}  (aperte pra parar)`,
     timerHint: "// aperte uma vez quando a contração começa, aperte de novo quando termina — mede a duração exata em segundos //",
+    nextLabel: "PRÓXIMA EM",
+    nextOverdueLabel: "ATRASADA",
     initialInfo: "Buffer de telemetria vazio. Aguardando primeira batida.",
     exportJsonBtn: "BAIXAR TELEMETRIA (.json)",
     exportCsvBtn: "BAIXAR TELEMETRIA (.csv)",
@@ -778,6 +796,8 @@ const I18N = {
     autoTimerIdle: "J'AI PERDU LE COMPTE",
     timerCounting: (mm, ss) => `CHRONO… ${mm}:${ss}  (touchez pour arrêter)`,
     timerHint: "// touchez une fois au début de la contraction, une fois à la fin — mesure la durée exacte en secondes //",
+    nextLabel: "PROCHAINE DANS",
+    nextOverdueLabel: "EN RETARD",
     initialInfo: "Journal de vol vide. En attente de la première rotation.",
     exportJsonBtn: "TÉLÉCHARGER LE JOURNAL (.json)",
     exportCsvBtn: "TÉLÉCHARGER LE JOURNAL (.csv)",
@@ -1041,30 +1061,125 @@ const BUCKETS = {
 };
 
 // --- Shareable snapshot via URL hash -----------------------------------
-// Encoding: base64url(JSON.stringify(presses)) under location.hash as
-// #share=<payload>. Kept client-side (hash, not query) so nothing hits a
-// server. When a share payload is present we enter read-only "shared
-// view" mode and do not touch localStorage until the viewer explicitly
-// saves.
+// Kept client-side (hash, not query) so nothing hits a server. When a
+// share payload is present we enter read-only "shared view" mode and do
+// not touch localStorage until the viewer explicitly saves.
+//
+// Two on-the-wire formats — both still accepted by the parser so links
+// handed out with older builds keep working forever:
+//   #share=<b64url>   legacy v1: base64url(JSON.stringify(presses)).
+//   #s=<b64url>       compact v2: packed bytes (see packShareV2 below),
+//                     ~10× shorter for long sessions.
+// Writer only emits the compact form.
 
-function b64urlEncode(str) {
-  return btoa(unescape(encodeURIComponent(str)))
-    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
 function b64urlDecode(str) {
   str = str.replace(/-/g, "+").replace(/_/g, "/");
   while (str.length % 4) str += "=";
   return decodeURIComponent(escape(atob(str)));
 }
+function b64urlEncodeBytes(bytes) {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function b64urlDecodeBytes(str) {
+  str = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (str.length % 4) str += "=";
+  const bin = atob(str);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+// Fixed enum so source can live in one byte. Unknown values decode back
+// to "legacy" — acceptable since this enum covers every source the app
+// ever writes (see load()/bucket handlers).
+const SHARE_SOURCE_CODES = {
+  "legacy":       0,
+  "bucket:hey":   1,
+  "bucket:ow":    2,
+  "bucket:ouch":  3,
+  "bucket:yikes": 4,
+  "measured":     5,
+};
+const SHARE_CODE_SOURCES = ["legacy", "bucket:hey", "bucket:ow", "bucket:ouch", "bucket:yikes", "measured"];
+
+function writeVarint(buf, n) {
+  n = n >>> 0;
+  while (n >= 0x80) { buf.push((n & 0x7f) | 0x80); n = n >>> 7; }
+  buf.push(n & 0x7f);
+}
+function readVarint(bytes, pos) {
+  let n = 0, shift = 0, b;
+  do {
+    b = bytes[pos.i++];
+    n |= (b & 0x7f) << shift;
+    shift += 7;
+  } while (b & 0x80);
+  return n >>> 0;
+}
+
+// Layout:
+//   byte 0:       version (2)
+//   bytes 1..6:   base timestamp, seconds since epoch, 48-bit big-endian
+//   varint:       press count
+//   per press:    varint deltaSec (from base), varint durationSec+1
+//                 (0 = null), 1-byte source code
+// Seconds-resolution is intentional: duration_sec is already an int, and
+// start_ts was only ever user-relevant at second granularity.
+function packShareV2(presses) {
+  const baseSec = presses.length ? Math.floor(presses[0].start_ts / 1000) : 0;
+  const buf = [2];
+  for (let i = 5; i >= 0; i--) buf.push(Math.floor(baseSec / Math.pow(256, i)) & 0xff);
+  writeVarint(buf, presses.length);
+  for (const p of presses) {
+    const deltaSec = Math.max(0, Math.floor(p.start_ts / 1000) - baseSec);
+    writeVarint(buf, deltaSec);
+    const durCode = (typeof p.duration_sec === "number" && isFinite(p.duration_sec))
+      ? Math.max(0, Math.round(p.duration_sec)) + 1
+      : 0;
+    writeVarint(buf, durCode);
+    buf.push(SHARE_SOURCE_CODES[p.source] ?? 0);
+  }
+  return b64urlEncodeBytes(Uint8Array.from(buf));
+}
+
+function unpackShareV2(str) {
+  const bytes = b64urlDecodeBytes(str);
+  if (bytes.length < 8 || bytes[0] !== 2) return null;
+  const pos = { i: 1 };
+  let baseSec = 0;
+  for (let i = 0; i < 6; i++) baseSec = baseSec * 256 + bytes[pos.i++];
+  const n = readVarint(bytes, pos);
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const delta = readVarint(bytes, pos);
+    const durCode = readVarint(bytes, pos);
+    const srcCode = bytes[pos.i++];
+    out.push({
+      start_ts: (baseSec + delta) * 1000,
+      duration_sec: durCode === 0 ? null : durCode - 1,
+      source: SHARE_CODE_SOURCES[srcCode] ?? "legacy",
+    });
+  }
+  return out;
+}
 
 function parseSharedFromHash() {
-  const m = (location.hash || "").match(/[#&]share=([^&]+)/);
-  if (!m) return null;
+  const hash = location.hash || "";
   try {
-    const arr = JSON.parse(b64urlDecode(m[1]));
-    if (!Array.isArray(arr)) return null;
-    return arr.filter(p => p && typeof p.start_ts === "number");
-  } catch { return null; }
+    const mNew = hash.match(/[#&]s=([^&]+)/);
+    if (mNew) {
+      const arr = unpackShareV2(mNew[1]);
+      if (Array.isArray(arr)) return arr.filter(p => p && typeof p.start_ts === "number");
+    }
+    const mOld = hash.match(/[#&]share=([^&]+)/);
+    if (mOld) {
+      const arr = JSON.parse(b64urlDecode(mOld[1]));
+      if (Array.isArray(arr)) return arr.filter(p => p && typeof p.start_ts === "number");
+    }
+  } catch { /* fall through to null */ }
+  return null;
 }
 
 const sharedPresses = parseSharedFromHash();
@@ -1392,6 +1507,42 @@ function computeStats(presses) {
   };
 }
 
+// Predicts the timestamp of the next contraction when the recent rhythm
+// is regular enough to be worth a countdown. Uses the last PREDICT_WINDOW
+// intervals; fits interval vs. index with ordinary least squares so a
+// shrinking trend shortens the prediction. Returns null unless the stdev
+// of those intervals is below PREDICT_STDEV_MAX_MIN.
+const PREDICT_WINDOW = 10;
+const PREDICT_STDEV_MAX_MIN = 3;
+function predictNextContraction(presses) {
+  const n = presses.length;
+  if (n < PREDICT_WINDOW + 1) return null;
+  const intervals = [];
+  for (let i = n - PREDICT_WINDOW; i < n; i++) {
+    intervals.push((presses[i].start_ts - presses[i-1].start_ts) / 60000);
+  }
+  const N = intervals.length;
+  const avg = intervals.reduce((a,b)=>a+b,0) / N;
+  const variance = intervals.reduce((a,b)=>a+(b-avg)**2,0) / N;
+  const stdev = Math.sqrt(variance);
+  if (stdev >= PREDICT_STDEV_MAX_MIN) return null;
+
+  let sumX=0, sumY=0, sumXY=0, sumXX=0;
+  for (let i = 0; i < N; i++) {
+    sumX += i; sumY += intervals[i];
+    sumXY += i * intervals[i]; sumXX += i * i;
+  }
+  const denom = N * sumXX - sumX * sumX;
+  const slope = denom === 0 ? 0 : (N * sumXY - sumX * sumY) / denom;
+  const intercept = (sumY - slope * sumX) / N;
+  const predictedNextInterval = slope * N + intercept;
+  const lastTs = presses[n - 1].start_ts;
+  return {
+    nextTs: lastTs + Math.max(0, predictedNextInterval) * 60000,
+    stdev,
+  };
+}
+
 // Heuristic display-only score in [0,1]. Not clinical. Combines proximity
 // to 5 min with σ-based regularity — both are rough and have no cited
 // numeric guideline threshold.
@@ -1540,11 +1691,36 @@ function updateInfo() {
   status.textContent = pickStatus(tier);
 }
 
+let currentPrediction = null;
+
+function updateCountdown() {
+  const el = document.getElementById("nextCountdown");
+  const valEl = document.getElementById("nextCountdownValue");
+  const labelEl = el.querySelector(".cd-label");
+  if (!currentPrediction || sharedMode) {
+    el.classList.remove("visible", "overdue");
+    return;
+  }
+  el.classList.add("visible");
+  const deltaMs = currentPrediction.nextTs - Date.now();
+  const overdue = deltaMs < 0;
+  const absSec = Math.floor(Math.abs(deltaMs) / 1000);
+  const mm = String(Math.floor(absSec / 60)).padStart(2, "0");
+  const ss = String(absSec % 60).padStart(2, "0");
+  valEl.textContent = (overdue ? "+" : "") + `${mm}:${ss}`;
+  labelEl.textContent = overdue ? T.nextOverdueLabel : T.nextLabel;
+  el.classList.toggle("overdue", overdue);
+}
+
 function render() {
   updateInfo();
   draw();
   drawOverview();
+  currentPrediction = predictNextContraction(presses);
+  updateCountdown();
 }
+
+setInterval(updateCountdown, 500);
 
 // --- Input handlers ----------------------------------------------------
 
@@ -1646,8 +1822,8 @@ document.getElementById("shareBtn").addEventListener("click", async () => {
     alert(T.noShareTelemetry);
     return;
   }
-  const payload = b64urlEncode(JSON.stringify(presses));
-  const url = `${location.origin}${location.pathname}${location.search}#share=${payload}`;
+  const payload = packShareV2(presses);
+  const url = `${location.origin}${location.pathname}${location.search}#s=${payload}`;
   try {
     await navigator.clipboard.writeText(url);
     const btn = document.getElementById("shareBtn");
